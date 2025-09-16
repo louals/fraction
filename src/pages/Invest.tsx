@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { fakeProjects } from '../data/projects';
+import { Card } from '../components/CardProperty';
 
 /**
  * page invest with grid card property
@@ -35,7 +37,22 @@ self-start'
           <img src='/assets/img/filter-list.svg' alt='icon filter' />
         </div>
       </div>
-      <div className='grid gap-[clamp(25px,5vw,60px)] grid-cols-[repeat(auto-fit,minmax(350px,1fr))]'></div>
+      <div className='grid gap-[20px] grid-cols-[repeat(auto-fit,minmax(300px,1fr))]'>
+        {fakeProjects.map((p) => (
+          <Card
+            key={p.id}
+            id={p.id}
+            title={p.title}
+            type={p.type}
+            size={p.size}
+            fundingRequired={p.fundingRequired}
+            situated={p.situated}
+            status={p.status}
+            tag={p.tag}
+            image={p.image}
+          />
+        ))}
+      </div>
     </div>
   );
 }
