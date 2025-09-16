@@ -46,7 +46,7 @@ export function Card(props: CardProps) {
     );
   }
   return (
-    <div className='border rounded-lg border-[var(--color-fraction-light-400)] p-[4px] bg-[var(--color-fraction-light-100)]'>
+    <div className='border rounded-lg border-[var(--color-fraction-light-400)] p-[6px] pb-[12px] bg-[var(--color-fraction-light-100)]'>
       <div className='border rounded-lg border-transparent relative overflow-hidden'>
         <img src={props.image} alt={props.title} />
         <button
@@ -58,9 +58,11 @@ export function Card(props: CardProps) {
           <img src='/assets/img/favorite-icon.svg' alt='' className='size-5' />
         </button>
       </div>
-      <div className='flex flex-row justify-between mt-[14px]'>
+      <div className='flex flex-row justify-between items-center mt-[14px]'>
         <div className='flex flex-col'>
-          <h3 className='text-2xl'>{props.title}</h3>
+          <h3 className='text-2xl text-[var(--color-fraction-violet-500)]'>
+            {props.title}
+          </h3>
           <p className='text-[var(--color-fraction-light-600)]'>{props.type}</p>
         </div>
         {renderTag(props.tag)}
