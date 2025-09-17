@@ -17,12 +17,12 @@ import React from 'react';
 export default function PropertyDetails() {
   return (
     <section className="p-0">
-      {/* Titre de la section */}
+      {/* Section title */}
       <h2 className="text-2xl font-semibold text-fraction-violet-500">
         Information
       </h2>
 
-      {/* Ligne de résumé */}
+      {/* Summary row with basic property details */}
       <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
         <InfoPill icon={<Home className="h-4 w-4" />} label="8 Rooms" />
         <InfoPill icon={<BedDouble className="h-4 w-4" />} label="4 Bedrooms" />
@@ -33,6 +33,7 @@ export default function PropertyDetails() {
           className="truncate max-w-[48ch]"
         />
 
+        {/* Construction year and availability status */}
         <div className="ml-auto flex items-center gap-8 text-fraction-gray-500">
           <span className="whitespace-nowrap flex items-center gap-2">
             <Calendar className="h-4 w-4 text-fraction-violet-300" />
@@ -49,7 +50,7 @@ export default function PropertyDetails() {
         </div>
       </div>
 
-      {/* Lien vers le quartier */}
+      {/* Link to neighborhood section */}
       <div className="mt-6">
         <a
           href="#neighborhood"
@@ -59,7 +60,7 @@ export default function PropertyDetails() {
         </a>
       </div>
 
-      {/* Caractéristiques */}
+      {/* Features grid */}
       <div className="mt-6 grid grid-cols-1 gap-8 text-fraction-gray-700 sm:grid-cols-2 lg:grid-cols-5">
         <FeatureItem
           icon={<Train className="h-5 w-5" />}
@@ -106,6 +107,9 @@ export default function PropertyDetails() {
   );
 }
 
+/**
+ * InfoPill: A small inline item showing an icon + a short label
+ */
 function InfoPill({
   icon,
   label,
@@ -123,6 +127,12 @@ function InfoPill({
   );
 }
 
+/**
+ * FeatureItem: A block representing a property feature
+ * - Displays a rounded icon on the left
+ * - Shows a title
+ * - Optionally shows a subtext (list or string)
+ */
 function FeatureItem({
   icon,
   title,
@@ -134,6 +144,7 @@ function FeatureItem({
 }) {
   return (
     <div className="flex items-start gap-3">
+      {/* Icon container */}
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-fraction-light-100 text-fraction-gray-600 ring-1 ring-fraction-light-300">
         {icon}
       </div>
