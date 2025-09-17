@@ -1,12 +1,13 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MainLayout from "./layouts/MainLayout";
-import AuthLayout from "./layouts/AuthLayout";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import AuthLayout from './layouts/AuthLayout';
 
-import { Home } from "./pages/Home";
-import { Invest } from "./pages/Invest";
-import { OneProductDetails } from "./pages/OneProductDetails";
-import LoginPage from "./components/auth/LoginPage";
-import SignupPage from "./components/auth/SignupPage";
+import { Home } from './pages/Home';
+import { Invest } from './pages/Invest';
+import { OneProductDetails } from './pages/OneProductDetails';
+import LoginPage from './components/auth/LoginPage';
+import SignupPage from './components/auth/SignupPage';
+// import 'mapbox-gl/dist/mapbox-gl.css';
 
 function App() {
   return (
