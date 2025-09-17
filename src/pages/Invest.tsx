@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { fakeProjects } from '../data/projects';
+import { Card } from '../components/CardProperty';
 
 /**
  * page invest with grid card property
@@ -26,16 +28,37 @@ self-start'
         </p>
       </div>
       <div className='border border-transparent rounded-[12px] bg-white/60  p-[24px] backdrop-blur-sm max-w-content flex gap-x-[20px] max-w-max'>
-        <p>All</p>
-        <p>Family residential</p>
-        <p>Vacation rental</p>
-        <p>Family residential</p>
+        <p className='text-[var(--color-fraction-light-600)]'>All</p>
+        <p className='text-[var(--color-fraction-light-600)]'>
+          Family residential
+        </p>
+        <p className='text-[var(--color-fraction-light-600)]'>
+          Vacation rental
+        </p>
+        <p className='text-[var(--color-fraction-light-600)]'>
+          Family residential
+        </p>
         <div className='flex flex-row gap-x-[8px]'>
-          <p>Filter</p>
+          <p className='text-[var(--color-fraction-light-600)]'>Filter</p>
           <img src='/assets/img/filter-list.svg' alt='icon filter' />
         </div>
       </div>
-      <div className='grid gap-[clamp(25px,5vw,60px)] grid-cols-[repeat(auto-fit,minmax(350px,1fr))]'></div>
+      <div className='grid gap-[20px] grid-cols-[repeat(auto-fit,minmax(300px,1fr))]'>
+        {fakeProjects.map((p) => (
+          <Card
+            key={p.id}
+            id={p.id}
+            title={p.title}
+            type={p.type}
+            size={p.size}
+            fundingRequired={p.fundingRequired}
+            situated={p.situated}
+            status={p.status}
+            tag={p.tag}
+            image={p.image}
+          />
+        ))}
+      </div>
     </div>
   );
 }
