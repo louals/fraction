@@ -4,10 +4,10 @@
 export interface CardProps {
   id: number;
   title: string;
-  type?: string;
-  size?: number; // sqft
-  fundingRequired?: number; // dollars
-  situated?: string;
+  type: string;
+  size: number; // sqft
+  fundingRequired: number; // dollars
+  situated: string;
   status?: string;
   tag?: 'New' | 'Almost gone' | 'Coming soon';
   image?: string;

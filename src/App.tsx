@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
+import DashboardLayout from './layouts/DashboardLayout';
 
 import { Home } from './pages/Home';
 import { Invest } from './pages/Invest';
@@ -8,6 +9,7 @@ import { Dashboard } from './pages/Dashboard';
 import { OneProductDetails } from './pages/OneProductDetails';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 function App() {
   return (
@@ -52,9 +54,9 @@ function App() {
           <Route
             path='/dashboard'
             element={
-              <MainLayout>
+              <DashboardLayout>
                 <Dashboard />
-              </MainLayout>
+              </DashboardLayout>
             }
           />
           <Route

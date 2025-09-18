@@ -63,11 +63,13 @@ export function Dashboard(): React.ReactNode {
 
   return (
     <div>
-      <h1 className='text-4xl font-bold text-violet-800'>Settings</h1>
+      <h1 className='text-4xl font-bold text-[var(--color-fraction-violet-500)]'>
+        Settings
+      </h1>
 
-      <div className='mt-6 grid grid-cols-[260px_1fr] gap-6'>
+      <div className='flex flex-row mt-20 gap-16'>
         {/* Nav à gauche */}
-        <aside className='space-y-3'>
+        <aside className='space-y-3 border-r-[2px] pr-16 border-[var(--color-fraction-light-500)]'>
           {nav.map((item) => {
             const isActive = active === item.key;
             return (
@@ -76,11 +78,11 @@ export function Dashboard(): React.ReactNode {
                 type='button'
                 onClick={() => setActive(item.key)}
                 className={[
-                  'w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition',
+                  'w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition text-[var(--color-fraction-light-500)]',
                   'flex items-center gap-3',
                   isActive
                     ? 'bg-[var(--color-fraction-violet-500)] text-white border-violet-700 shadow-sm'
-                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50',
+                    : 'bg-white border-gray-200 hover:bg-gray-50',
                 ].join(' ')}
               >
                 <span
@@ -99,7 +101,6 @@ export function Dashboard(): React.ReactNode {
 
         {/* Contenu à droite */}
         <section className='relative'>
-          <div className='pointer-events-none absolute -left-6 top-0 hidden h-full w-px bg-gray-200 md:block' />
           <div className='pl-0 md:pl-6'>
             {active === 'account' && <AccountSettings />}
             {active === 'payment' && <Placeholder title='Payment' />}
