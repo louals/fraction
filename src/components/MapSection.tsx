@@ -21,7 +21,7 @@ export default function MapSection({
   mapStyleUrl,
 }: MapSectionProps) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+    <section className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
       {/* Left block: About section */}
       <div className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm min-h-[400px]">
         {/* Header with a purple background and title */}
