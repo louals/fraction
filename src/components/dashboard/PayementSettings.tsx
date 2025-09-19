@@ -36,8 +36,11 @@ export default function PaymentSettings(): React.ReactNode {
 
       <div className='flex flex-row gap-x-10'>
         {/* ------------------ Colonne gauche : cartes ------------------ */}
-        <div className='space-y-4'>
-          <div className='rounded-3xl border border-gray-200 bg-white px-6 py-4 shadow-sm'>
+        <div
+          className='space-y-4 max-w-xs
+'
+        >
+          <div className='max-w-sm rounded-3xl border border-gray-200 bg-white px-6 py-4 shadow-sm'>
             <div className='grid grid-cols-[auto_1fr] items-center gap-6'>
               <div className='text-[var(--color-fraction-violet-700,#3a2f85)]'>
                 <CardPaymentIcon className='w-[96px] h-auto' />
@@ -57,7 +60,7 @@ export default function PaymentSettings(): React.ReactNode {
 
           <button
             type='button'
-            className='w-full rounded-3xl border-2 border-dashed border-gray-300 bg-white px- py-6 text-left transition hover:border-gray-400'
+            className='w-full rounded-3xl border-2 border-dashed border-gray-300 bg-white px-6 py-6 text-left transition hover:border-gray-400'
           >
             <div className='flex items-center gap-6 text-[var(--color-fraction-light-700,#9b94a6)]'>
               <span className='grid size-14 place-items-center rounded-full border-2 border-current'>
@@ -69,12 +72,12 @@ export default function PaymentSettings(): React.ReactNode {
         </div>
 
         {/* ------------------ Colonne droite : formulaire ------------------ */}
-        <div>
+        <div className='grow'>
           <h3 className='mb-4 border-b border-gray-200 pb-3 text-2xl text-[var(--color-fraction-violet-700,#3a2f85)]'>
             Add a new payment methods
           </h3>
 
-          <div className='flex flex-row'>
+          <div className='flex flex-row justify-between'>
             <div className='space-y-4'>
               {/* Card Number */}
               <label className='block text-sm'>
@@ -154,11 +157,11 @@ export default function PaymentSettings(): React.ReactNode {
                 </button>
               </div>
             </div>
-            <div className='flex'>
+            <div className='flex gap-2'>
               <span className='max-w-[10ch]'>
                 We accepte Master Card, Visa Card and American Express.
               </span>
-              <div className='flex flex-wrap'>
+              <div className='flex flex-row flex-wrap gap-1.5'>
                 <img
                   className='max-w-[36px] h-max
 '
