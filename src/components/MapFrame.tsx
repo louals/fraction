@@ -1,8 +1,8 @@
 // src/components/MapFrame.tsx
-
 // @ts-ignore → TypeScript does not yet have proper type definitions for react-map-gl/mapbox
-import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
 
+import Map, { Marker, NavigationControl } from 'react-map-gl/mapbox';
+import { MapPin } from 'lucide-react';
 type MapFrameProps = {
   lat: number; // Latitude of the map center
   lng: number; // Longitude of the map center
@@ -39,7 +39,9 @@ export default function MapFrame({
         <NavigationControl position="top-right" />
 
         {/* Add a marker at the given coordinates */}
-        <Marker latitude={lat} longitude={lng} />
+        <Marker latitude={lat} longitude={lng} anchor="bottom">
+          <MapPin size={36} color="#7c3aed" strokeWidth={2.5} />
+        </Marker>
       </Map>
     </div>
   );
