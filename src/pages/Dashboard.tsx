@@ -7,6 +7,7 @@ import UserIcon from '../assets/icons/user.svg?react';
 import BellIcon from '../assets/icons/bell.svg?react';
 import HelpIcon from '../assets/icons/help.svg?react';
 import AccountSettings from '../components/dashboard/AccountSettings';
+import PayementSettings from '../components/dashboard/PayementSettings';
 
 type TabKey =
   | 'account'
@@ -67,9 +68,9 @@ export function Dashboard(): React.ReactNode {
         Settings
       </h1>
 
-      <div className='flex flex-row mt-20 gap-16'>
+      <div className='flex flex-row mt-20 gap-12'>
         {/* Nav à gauche */}
-        <aside className='space-y-3 border-r-[2px] pr-16 border-[var(--color-fraction-light-500)]'>
+        <aside className='space-y-3 border-r-[2px] pr-12 border-[var(--color-fraction-light-500)]'>
           {nav.map((item) => {
             const isActive = active === item.key;
             return (
@@ -100,10 +101,10 @@ export function Dashboard(): React.ReactNode {
         </aside>
 
         {/* Contenu à droite */}
-        <section className='relative'>
-          <div className='pl-0 md:pl-6'>
+        <section className='relative grow'>
+          <div className=''>
             {active === 'account' && <AccountSettings />}
-            {active === 'payment' && <Placeholder title='Payment' />}
+            {active === 'payment' && <PayementSettings />}
             {active === 'security' && (
               <Placeholder title='Password & security' />
             )}
