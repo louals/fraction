@@ -48,7 +48,7 @@ export function TabsInfo() {
             <PropertyDetails />
 
             {/* About + Map section */}
-            <MapSection lat={40.7128} lng={-74.006} zoom={12} />
+            <MapSection lat={45.4501} lng={-73.4659} zoom={12} />
           </div>
         )}
 
