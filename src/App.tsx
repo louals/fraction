@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
+import DashboardLayout from './layouts/DashboardLayout';
 
 import { Home } from './pages/Home';
 import { Invest } from './pages/Invest';
+import { Dashboard } from './pages/Dashboard';
 import { OneProductDetails } from './pages/OneProductDetails';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
@@ -11,12 +13,12 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 function App() {
   return (
-    <div className="relative h-screen">
+    <div className='relative h-screen'>
       <BrowserRouter>
         <Routes>
           {/* Auth routes - full page */}
           <Route
-            path="/login"
+            path='/login'
             element={
               <AuthLayout>
                 <LoginPage />
@@ -24,7 +26,7 @@ function App() {
             }
           />
           <Route
-            path="/signup"
+            path='/signup'
             element={
               <AuthLayout>
                 <SignupPage />
@@ -34,7 +36,7 @@ function App() {
 
           {/* Main app routes - wrapped in MainLayout */}
           <Route
-            path="/"
+            path='/'
             element={
               <MainLayout>
                 <Home />
@@ -42,7 +44,7 @@ function App() {
             }
           />
           <Route
-            path="/invest"
+            path='/invest'
             element={
               <MainLayout>
                 <Invest />
@@ -50,7 +52,15 @@ function App() {
             }
           />
           <Route
-            path="/oneProductDetails"
+            path='/dashboard'
+            element={
+              <DashboardLayout>
+                <Dashboard />
+              </DashboardLayout>
+            }
+          />
+          <Route
+            path='/oneProductDetails'
             element={
               <MainLayout>
                 <OneProductDetails />
