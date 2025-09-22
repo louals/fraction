@@ -8,6 +8,7 @@ import BellIcon from '../assets/icons/bell.svg?react';
 import HelpIcon from '../assets/icons/help.svg?react';
 import AccountSettings from '../components/dashboard/AccountSettings';
 import PayementSettings from '../components/dashboard/PayementSettings';
+import PasswordSecuritySettings from '../components/dashboard/PasswordSecuritySettings';
 
 type TabKey =
   | 'account'
@@ -105,9 +106,7 @@ export function Dashboard(): React.ReactNode {
           <div className=''>
             {active === 'account' && <AccountSettings />}
             {active === 'payment' && <PayementSettings />}
-            {active === 'security' && (
-              <Placeholder title='Password & security' />
-            )}
+            {active === 'security' && <PasswordSecuritySettings />}
             {active === 'personal' && (
               <Placeholder title='Personal Information' />
             )}
