@@ -36,7 +36,11 @@ export default function PasswordSecuritySettings(): React.ReactNode {
             <div className='flex flex-row gap-6'>
               <div>
                 <label htmlFor='password'>Current password</label>
-                <div className='flex flex-row gap-2 items-center p-2 border-[2px] border-[var(--color-fraction-light-400)] rounded-lg  max-w-max shadow-lg'>
+                <div
+                  className='flex flex-row gap-2 items-center p-2 border-[2px] border-[var(--color-fraction-light-400)] rounded-lg  max-w-max shadow-lg focus-within:border-violet-500
+                  focus-within:ring-2 focus-within:ring-violet-200
+                  focus-within:ring-offset-0.5'
+                >
                   <div className='flex flex-row gap-3 items-center'>
                     <LockPasswordIcon />
                     <input
@@ -61,7 +65,11 @@ export default function PasswordSecuritySettings(): React.ReactNode {
               </div>
               <div>
                 <label htmlFor='Newpassword'>New password</label>
-                <div className='flex flex-row gap-2 items-center p-2 border-[2px] border-[var(--color-fraction-light-400)] rounded-lg  max-w-max shadow-lg'>
+                <div
+                  className='flex flex-row gap-2 items-center p-2 border-[2px] border-[var(--color-fraction-light-400)] rounded-lg  max-w-max shadow-lg focus-within:border-violet-500
+                  focus-within:ring-2 focus-within:ring-violet-200
+                  focus-within:ring-offset-0.5'
+                >
                   <div className='flex flex-row gap-3 items-center'>
                     <LockPasswordIcon />
                     <input
