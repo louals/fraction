@@ -64,7 +64,9 @@ export default function InvestmentCard() {
         <h2 className="text-4xl font-bold text-fraction-violet-500">
           {data?.name}
         </h2>
-        <p className="text-base italic text-fraction-light-500">{data?.type}</p>
+        <p className="text-base italic text-fraction-light-gray">
+          {data?.type}
+        </p>
 
         {/* List */}
         <div className="mt-4 text-sm text-gray-600 divide-y divide-gray-200">
