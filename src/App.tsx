@@ -10,6 +10,7 @@ import { Dashboard } from './pages/Dashboard';
 import { OneProductDetails } from './pages/OneProductDetails';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
+import ErrorPage from './pages/ErrorPage';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 function App() {
@@ -66,6 +67,14 @@ function App() {
               <MainLayout>
                 <OneProductDetails />
               </MainLayout>
+            }
+          />
+          <Route
+            path='/404'
+            element={
+              <DashboardLayout2>
+                <ErrorPage />
+              </DashboardLayout2>
             }
           />
         </Routes>
