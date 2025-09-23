@@ -1,6 +1,11 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/inter';
 
 @theme {
+  /* font inter pour projet */
+  --font-inter: 'Inter Variable', 'Inter', ui-sans-serif, system-ui,
+    -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
   /* exemple utilisation bg-fraction-light-100  */
 
   /* Fraction Light (#F5F5F5) */
@@ -77,4 +82,20 @@
 
   --color-fraction-light-blue: #9399ff;
   --color-fraction-light-viloet: #837abc;
+}
+
+html {
+  font-family: var(--font-inter), ui-sans-serif;
+}
+body {
+  color: var(--color-fraction-violet-500);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a,
+p,
+h1,
+h2,
+h3 {
+  color: inherit;
 }

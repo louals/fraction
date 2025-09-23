@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
+import DashboardLayout2 from './layouts/DashboardLayout2';
 
 import { Home } from './pages/Home';
 import { Invest } from './pages/Invest';
@@ -54,9 +55,9 @@ function App() {
           <Route
             path='/dashboard'
             element={
-              <DashboardLayout>
+              <DashboardLayout2>
                 <Dashboard />
-              </DashboardLayout>
+              </DashboardLayout2>
             }
           />
           <Route
