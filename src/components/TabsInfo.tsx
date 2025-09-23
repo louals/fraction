@@ -36,7 +36,7 @@ export function TabsInfo() {
   return (
     <div>
       {/* Tabs bar: clickable pills to switch active tab */}
-      <div className='inline-flex w-full items-center gap-3 rounded-2xl bg-fraction-light-50 p-6 border border-fraction-gray-400 shadow-sm'>
+      <div className="inline-flex w-full items-center gap-3 rounded-2xl bg-fraction-light-50 p-6 border border-fraction-gray-500 shadow-sm">
         {TABS.map((t) => {
           const isActive = active === t.id; // compute active state per tab
           return (
@@ -47,7 +47,7 @@ export function TabsInfo() {
                 'rounded-full px-8 py-2 text-sm font-medium transition',
                 isActive
                   ? 'bg-fraction-violet-500 text-white shadow' // active styling
-                  : 'bg-white text-fraction-light-700 border border-gray-200 hover:bg-gray-50', // inactive styling
+                  : 'bg-white text-fraction-super-light-gray border border-fraction-gray-secondary hover:bg-gray-50', // inactive styling
               ].join(' ')}
             >
               {t.label}
@@ -57,9 +57,9 @@ export function TabsInfo() {
       </div>
 
       {/* Tabs content: conditionally render the panel matching the active tab */}
-      <section className='mt-4 bg-white'>
+      <section className="mt-4 bg-white">
         {active === 'details' && (
-          <div id='panel-details'>
+          <div id="panel-details">
             {/* Property details followed by the map centered on given coordinates */}
             <PropertyDetails />
             <MapSection lat={45.4501} lng={-73.4659} zoom={12} />
@@ -67,24 +67,24 @@ export function TabsInfo() {
         )}
 
         {active === 'finances' && (
-          <div id='panel-finances' className='space-y-6'>
+          <div id="panel-finances" className="space-y-6">
             {/* Finance-related summary/cards/charts */}
             <FinancesTab />
           </div>
         )}
 
         {active === 'performance' && (
-          <div id='panel-performance' className='space-y-6'>
+          <div id="panel-performance" className="space-y-6">
             {/* Performance: pass time-series history to chart/visuals */}
             <PerformanceTab history={performanceHistory} />
           </div>
         )}
 
         {active === 'documents' && (
-          <div id='panel-documents'>
+          <div id="panel-documents">
             {/* Simple placeholder for documents area */}
-            <h2 className='text-lg font-semibold text-gray-900'>Documents</h2>
-            <p className='mt-1 text-sm text-gray-600'>
+            <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
+            <p className="mt-1 text-sm text-gray-600">
               Files and documents related to the product.
             </p>
           </div>

@@ -69,7 +69,7 @@ export default function InvestmentCard() {
         </p>
 
         {/* List */}
-        <div className="mt-4 text-sm text-gray-600 divide-y divide-gray-200">
+        <div className="mt-4 text-sm text-fraction-super-light-gray divide-y divide-gray-200">
           <div className="flex justify-between py-2">
             <span>Purchase price</span>
             <span className="font-medium">${data?.price.toLocaleString()}</span>
@@ -90,19 +90,21 @@ export default function InvestmentCard() {
 
       {/* Status + Invest */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-[#362a74] p-4 shadow-lg">
-        <div className="text-sm text-gray-300">
+        <div className="text-sm text-fraction-gray-secondary">
           <span>Status: </span>
-          <span className="font-medium text-green-400">{data?.status}</span>
+          <span className="font-medium text-fraction-light-green">
+            {data?.status}
+          </span>
         </div>
 
-        <div className="mt-1 text-sm text-gray-300">
+        <div className="mt-1 text-sm text-fraction-gray-secondary">
           <span>Remaining investment: </span>
           <span className="align-baseline text-2xl font-semibold tracking-tight text-white">
             ${data?.remaining.toLocaleString()}
           </span>
         </div>
 
-        <button className="mt-4 mx-auto block w-3/4 max-w-[260px] rounded-full bg-[#b37ad8] px-6 py-1.5 font-medium text-white/95 hover:bg-[#a66cd3] transition">
+        <button className="mt-4 mx-auto block w-3/4 max-w-[260px] rounded-full bg-fraction-lilac-500 px-6 py-1.5 font-medium text-white/95 hover:bg-[#a66cd3] transition">
           Invest
         </button>
       </div>
