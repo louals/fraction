@@ -79,6 +79,9 @@
   --color-fraction-dark-700: #161130;
   --color-fraction-dark-800: #100d25;
   --color-fraction-dark-900: #0b081a;
+
+  --color-fraction-light-blue: #9399ff;
+  --color-fraction-light-viloet: #837abc;
 }
 
 @layer base {

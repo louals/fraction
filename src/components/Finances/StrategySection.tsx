@@ -22,10 +22,10 @@ export default function StrategySection({
         {items.map((it, idx) => (
           <details key={idx} className="group open:bg-gray-50">
             {/* Summary row with label, value and chevron icon */}
-            <summary className="flex cursor-pointer items-center justify-between gap-6  py-4 list-none [&::-webkit-details-marker]:hidden">
-              <span className="text-[14px] text-gray-700">
+            <summary className="flex cursor-pointer items-center justify-between gap-6  p-4 list-none [&::-webkit-details-marker]:hidden">
+              <span className="text-[14px] text-fraction-gray-500">
                 <span className="font-medium">{it.label}:</span>{' '}
-                <span className="text-gray-500">{it.value}</span>
+                <span className="text-fraction-gray-500">{it.value}</span>
               </span>
 
               {/* Chevron icon replaces the default ▾ and rotates when open */}
@@ -38,7 +38,7 @@ export default function StrategySection({
             </summary>
 
             {/* Content visible only when the details element is open */}
-            <div className="hidden px-5 pb-4 text-sm text-gray-600 group-open:block">
+            <div className="hidden px-5 pb-4 text-sm text-fraction-gray-500 group-open:block">
               <p className="leading-6 p-2">
                 Sample information for{' '}
                 <span className="font-medium">{it.label}</span> — Lorem ipsum

@@ -1,7 +1,7 @@
 import SummaryCards from './SummaryCards';
 import StrategySection from './StrategySection';
-// import ReturnsCalculator from './ReturnsCalculator';
-// import ExitStrategy from './ExitStrategy';
+import ReturnsCalculator from './ReturnsCalculator';
+import ExitStrategy from './ExitStrategy';
 
 // Types for the Finance tab props
 export type FinanceSummary = {
@@ -65,6 +65,15 @@ export default function FinancesTab() {
           { label: 'Expected Market Growth', value: strategy.growth },
         ]}
       />
+
+      <div className="space-y-4">
+        <h3 className="text-[20px] font-semibold text-fraction-violet-500">
+          Investment Strategy Returns Calculator
+        </h3>
+        <ReturnsCalculator />
+      </div>
+
+      <ExitStrategy />
     </section>
   );
 }
