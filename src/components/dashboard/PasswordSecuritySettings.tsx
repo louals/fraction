@@ -5,9 +5,20 @@ import LockPasswordIcon from '../../assets/icons/lock-password.svg?react';
 import EyeOpenIcon from '../../assets/icons/eye-open.svg?react';
 import EyeCloseIcon from '../../assets/icons/eye-close.svg?react';
 
-export default function PasswordSecuritySettings() {
+export default function PasswordSecuritySettings(): React.ReactNode {
   /* afficher ou non le mot de passe en clair */
-  const [showCurrent, setShowCurrent] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [password, setPassword] = useState('test123');
+
+  /**
+   * Gère la soumission du formulaire Password
+   * @param e - Événement submit du formulaire.
+   */
+  async function passwordSubmit(e: React.FormEvent): Promise<void> {
+    e.preventDefault();
+  }
+
   return (
     <div>
       <h2 className='text-3xl text-[var(--color-fraction-violet-500)]'>
@@ -21,7 +32,7 @@ export default function PasswordSecuritySettings() {
             </h3>
             <p>Change current Passwords</p>
           </div>
-          <form>
+          <form onSubmit={passwordSubmit}>
             <div className='flex flex-row gap-6'>
               <div>
                 <label htmlFor='password'>Current password</label>
@@ -30,19 +41,21 @@ export default function PasswordSecuritySettings() {
                     <LockPasswordIcon />
                     <input
                       className='border-0 focus:outline-none'
-                      type={showCurrent ? 'text' : 'password'}
+                      type={showCurrentPassword ? 'text' : 'password'}
                       name='password'
                       id='password'
-                      value='wadawdawd'
+                      value={password}
                     />
                   </div>
                   <button
                     type='button'
-                    onClick={() => setShowCurrent((s) => !s)}
-                    aria-pressed={showCurrent}
-                    aria-label={showCurrent ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowCurrentPassword((s) => !s)}
+                    aria-pressed={showCurrentPassword}
+                    aria-label={
+                      showCurrentPassword ? 'Hide password' : 'Show password'
+                    }
                   >
-                    {showCurrent ? <EyeCloseIcon /> : <EyeOpenIcon />}
+                    {showCurrentPassword ? <EyeCloseIcon /> : <EyeOpenIcon />}
                   </button>
                 </div>
               </div>
@@ -53,21 +66,31 @@ export default function PasswordSecuritySettings() {
                     <LockPasswordIcon />
                     <input
                       className='border-0 focus:outline-none'
-                      type='password'
+                      type={showNewPassword ? 'text' : 'password'}
                       name='Newpassword'
                       id='Newpassword'
-                      value='wadawdawd'
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
-                  <EyeOpenIcon />
+                  <button
+                    type='button'
+                    onClick={() => setShowNewPassword((s) => !s)}
+                    aria-pressed={showNewPassword}
+                    aria-label={
+                      showNewPassword ? 'Hide password' : 'Show password'
+                    }
+                  >
+                    {showNewPassword ? <EyeCloseIcon /> : <EyeOpenIcon />}
+                  </button>
                 </div>
               </div>
             </div>
-            <input
+            <button
               type='submit'
-              value='Modify'
               className='mt-4 max-w-max border-[2px] border-transparent bg-[var(--color-fraction-violet-500)] rounded-xl text-white px-4 py-2 hover:bg-white hover:border-[var(--color-fraction-violet-500)] hover:text-[var(--color-fraction-violet-500)] transition duration-300 cursor-pointer'
-            />
+            >
+              Modify
+            </button>
           </form>
         </div>
 
