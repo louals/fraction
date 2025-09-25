@@ -1,4 +1,5 @@
 import React from 'react';
+import FavoriteIcon from '../assets/icons/favorite-icon.svg?react'; // chemin à ajuster si besoin
 
 // Fake API –
 async function fakeFetchCard(_payload: {}): Promise<{
@@ -61,9 +62,12 @@ export default function InvestmentCard() {
     <div className="h-full rounded-2xl bg-gradient-to-br from-pink-50 to-purple-50 p-6 shadow-lg flex flex-col justify-between">
       {/* Header */}
       <div>
-        <h2 className="text-4xl font-bold text-fraction-violet-500">
-          {data?.name}
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-4xl font-bold text-fraction-violet-500">
+            {data?.name}
+          </h2>
+          <FavoriteIcon />
+        </div>
         <p className="text-base italic text-fraction-gray-520">{data?.type}</p>
 
         {/* List */}
