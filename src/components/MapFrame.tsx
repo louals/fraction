@@ -26,7 +26,7 @@ export default function MapFrame({
 
   return (
     <div
-      className={`rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden ${className}`}
+      className={`rounded-xl border border-fraction-gray-280 bg-white shadow-sm overflow-hidden ${className}`}
       style={{ height: '400px', width: '100%' }} // Fixed height to prevent rendering issues
     >
       <Map

@@ -1,4 +1,5 @@
 import React from 'react';
+import FavoriteIcon from '../assets/icons/favorite-icon.svg?react'; // chemin à ajuster si besoin
 
 // Fake API –
 async function fakeFetchCard(_payload: {}): Promise<{
@@ -61,15 +62,16 @@ export default function InvestmentCard() {
     <div className="h-full rounded-2xl bg-gradient-to-br from-pink-50 to-purple-50 p-6 shadow-lg flex flex-col justify-between">
       {/* Header */}
       <div>
-        <h2 className="text-4xl font-bold text-fraction-violet-500">
-          {data?.name}
-        </h2>
-        <p className="text-base italic text-fraction-light-gray">
-          {data?.type}
-        </p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-4xl font-bold text-fraction-violet-500">
+            {data?.name}
+          </h2>
+          <FavoriteIcon />
+        </div>
+        <p className="text-base italic text-fraction-gray-520">{data?.type}</p>
 
         {/* List */}
-        <div className="mt-4 text-sm text-gray-600 divide-y divide-gray-200">
+        <div className="mt-4 text-sm text-fraction-gray-650 divide-y divide-fraction-gray-300">
           <div className="flex justify-between py-2">
             <span>Purchase price</span>
             <span className="font-medium">${data?.price.toLocaleString()}</span>
@@ -82,7 +84,7 @@ export default function InvestmentCard() {
             <span>Situated</span>
             <span className="font-medium">{data?.situated}</span>
           </div>
-          <div className="flex justify-end py-2 text-gray-500">
+          <div className="flex justify-end py-2 text-fraction-gray-650">
             <span>{data?.funded}</span>
           </div>
         </div>
@@ -90,19 +92,21 @@ export default function InvestmentCard() {
 
       {/* Status + Invest */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-[#362a74] p-4 shadow-lg">
-        <div className="text-sm text-gray-300">
+        <div className="text-sm text-fraction-gray-280">
           <span>Status: </span>
-          <span className="font-medium text-green-400">{data?.status}</span>
+          <span className="font-medium text-fraction-green-400">
+            {data?.status}
+          </span>
         </div>
 
-        <div className="mt-1 text-sm text-gray-300">
+        <div className="mt-1 text-sm text-fraction-gray-280">
           <span>Remaining investment: </span>
           <span className="align-baseline text-2xl font-semibold tracking-tight text-white">
             ${data?.remaining.toLocaleString()}
           </span>
         </div>
 
-        <button className="mt-4 mx-auto block w-3/4 max-w-[260px] rounded-full bg-[#b37ad8] px-6 py-1.5 font-medium text-white/95 hover:bg-[#a66cd3] transition">
+        <button className="mt-4 mx-auto block w-3/4 max-w-[260px] rounded-full bg-fraction-lilac-500 px-6 py-1.5 font-medium text-white/95 hover:bg-[#a66cd3] transition">
           Invest
         </button>
       </div>

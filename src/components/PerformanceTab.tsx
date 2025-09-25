@@ -31,13 +31,13 @@ export default function PerformanceTab({ history }: PerformanceProps) {
         <h3 className="text-[18px] font-bold text-fraction-violet-500">
           Historical Appreciation Rate
         </h3>
-        <p className="text-[13px] text-fraction-light-blue">
+        <p className="text-[13px] text-fraction-blue-300">
           How much has the property value increased over the past years?
         </p>
       </div>
 
       {/* Chart container */}
-      <div className="h-[320px] w-full rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="h-[320px] w-full rounded-2xl border border-fraction-gray-500 bg-white shadow-sm">
         <div className="h-full w-full p-4">
           <ResponsiveContainer>
             <LineChart
@@ -92,27 +92,27 @@ export default function PerformanceTab({ history }: PerformanceProps) {
       </div>
 
       {/* Informational static sections */}
-      <div className="space-y-8">
+      <div className="space-y-14">
         <section>
-          <h4 className="text-[13px] font-semibold text-gray-700">
+          <h4 className="text-[13px] font-semibold text-black">
             Projected Future Growth
           </h4>
-          <p className="text-[12px] leading-5 text-gray-500">
+          <p className="text-[12px] leading-5 text-black">
             Expected appreciation based on market trends and location analysis.
           </p>
         </section>
 
         <section>
-          <h4 className="text-[13px] font-semibold text-gray-700">
+          <h4 className="text-[13px] font-semibold text-black">
             Comparable Market Data
           </h4>
-          <p className="text-[12px] leading-5 text-gray-500">
+          <p className="text-[12px] leading-5 text-black">
             How does this property compare to similar ones in the area?
           </p>
         </section>
 
         <section>
-          <h4 className="text-[13px] font-semibold text-gray-700">
+          <h4 className="text-[13px] font-semibold text-black">
             Risk Assessment &amp; Stability
           </h4>
         </section>

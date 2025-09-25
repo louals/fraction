@@ -11,6 +11,7 @@
   /* Fraction Light (#F5F5F5) */
   --color-fraction-light-50: #ffffff;
   --color-fraction-light-100: #fafafa;
+  --color-fraction-light-150: #f3f3f3;
   --color-fraction-light-200: #f5f5f5; /* Base */
   --color-fraction-light-300: #e5e5e5;
   --color-fraction-light-400: #d4d4d4;
@@ -36,10 +37,13 @@
   --color-fraction-gray-50: #f7f6f6;
   --color-fraction-gray-100: #ece9e9;
   --color-fraction-gray-200: #d9d3d3;
+  --color-fraction-gray-280: #c6c1c1;
   --color-fraction-gray-300: #c6bdbd;
   --color-fraction-gray-400: #b3a7a7;
   --color-fraction-gray-500: #a29797; /* Base */
+  --color-fraction-gray-520: #877878;
   --color-fraction-gray-600: #857979;
+  --color-fraction-gray-650: #807676;
   --color-fraction-gray-700: #695c5c;
   --color-fraction-gray-800: #4d3f3f;
   --color-fraction-gray-900: #322424;
@@ -49,6 +53,7 @@
   --color-fraction-lilac-100: #eedff6;
   --color-fraction-lilac-200: #dbbff0;
   --color-fraction-lilac-300: #c79fe9;
+  --color-fraction-violet-350: #837abc;
   --color-fraction-lilac-400: #b47fe3;
   --color-fraction-lilac-500: #a770c1; /* Base */
   --color-fraction-lilac-600: #8c5ba3;
@@ -80,9 +85,23 @@
   --color-fraction-dark-800: #100d25;
   --color-fraction-dark-900: #0b081a;
 
-  --color-fraction-light-blue: #9399ff;
-  --color-fraction-light-viloet: #837abc;
-  --color-fraction-light-gray: #877878;
+  --color-fraction-blue-50: #f4f5ff;
+  --color-fraction-blue-100: #e0e2ff;
+  --color-fraction-blue-200: #c7c9ff;
+  --color-fraction-blue-300: #9399ff; /* Base*/
+  --color-fraction-blue-400: #767dff;
+  --color-fraction-blue-500: #5a61f0;
+  --color-fraction-blue-600: #4248d2;
+  --color-fraction-blue-700: #2e33a3;
+
+  --color-fraction-green-50: #f2faeb;
+  --color-fraction-green-100: #e2f5d2;
+  --color-fraction-green-200: #c7ecaa;
+  --color-fraction-green-300: #aade88;
+  --color-fraction-green-400: #8cd266; /* Base*/
+  --color-fraction-green-500: #6db544;
+  --color-fraction-green-600: #4e8f2f;
+  --color-fraction-green-700: #36661f;
 }
 
 @layer base {

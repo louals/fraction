@@ -23,14 +23,14 @@ export default function MapSection({
   return (
     <section className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch text-white">
       {/* Left block: About section */}
-      <div className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm min-h-[400px]">
+      <div className="flex flex-col rounded-xl border border-fraction-gray-280 bg-white shadow-sm min-h-[400px]">
         {/* Header with a purple background and title */}
         <div className="mx-2 mt-2 rounded-md bg-fraction-violet-500 px-4 py-2">
           <h3 className="text-white text-sm font-medium">{aboutTitle}</h3>
         </div>
 
         {/* Text content of the About section */}
-        <div className="flex-1 p-6 space-y-2 text-sm text-gray-700">
+        <div className="flex-1 p-6 space-y-2 text-sm text-fraction-gray-700">
           {aboutText.map((t, i) => (
             <p key={i}>{t}</p>
           ))}
