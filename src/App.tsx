@@ -3,7 +3,9 @@ import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import DashboardLayout from './layouts/DashboardLayout';
 import DashboardLayout2 from './layouts/DashboardLayout2';
+import LandingLayout from './layouts/LandingLayout';
 
+import Landing from './pages/Landing';
 import { Home } from './pages/Home';
 import { Invest } from './pages/Invest';
 import { Dashboard } from './pages/Dashboard';
@@ -18,6 +20,15 @@ function App() {
     <div className='relative h-screen'>
       <BrowserRouter>
         <Routes>
+          {/* Ladnging route - Wrapped in LadingLayout */}
+          <Route
+            path='/'
+            element={
+              <LandingLayout>
+                <Landing />
+              </LandingLayout>
+            }
+          />
           {/* Auth routes - full page */}
           <Route
             path='/login'
