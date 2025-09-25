@@ -4,7 +4,7 @@ export default function ExitStrategy() {
       <h3 className="text-[20px] font-semibold text-fraction-violet-500">
         Exit Strategy & Liquidity
       </h3>
-      <p className="text-sm text-fraction-light-viloet">
+      <p className="text-sm text-fraction-violet-350">
         how can investors withdraw or sell their shares when needed.
       </p>
       <p className="max-w-3xl text-[12px] leading-5 text-fraction-gray-500">

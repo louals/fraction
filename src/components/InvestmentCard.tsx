@@ -64,12 +64,10 @@ export default function InvestmentCard() {
         <h2 className="text-4xl font-bold text-fraction-violet-500">
           {data?.name}
         </h2>
-        <p className="text-base italic text-fraction-light-gray">
-          {data?.type}
-        </p>
+        <p className="text-base italic text-fraction-gray-520">{data?.type}</p>
 
         {/* List */}
-        <div className="mt-4 text-sm text-fraction-super-light-gray divide-y divide-gray-200">
+        <div className="mt-4 text-sm text-fraction-gray-650 divide-y divide-fraction-gray-300">
           <div className="flex justify-between py-2">
             <span>Purchase price</span>
             <span className="font-medium">${data?.price.toLocaleString()}</span>
@@ -82,7 +80,7 @@ export default function InvestmentCard() {
             <span>Situated</span>
             <span className="font-medium">{data?.situated}</span>
           </div>
-          <div className="flex justify-end py-2 text-gray-500">
+          <div className="flex justify-end py-2 text-fraction-gray-650">
             <span>{data?.funded}</span>
           </div>
         </div>
@@ -90,14 +88,14 @@ export default function InvestmentCard() {
 
       {/* Status + Invest */}
       <div className="mt-6 rounded-2xl border border-white/10 bg-[#362a74] p-4 shadow-lg">
-        <div className="text-sm text-fraction-gray-secondary">
+        <div className="text-sm text-fraction-gray-280">
           <span>Status: </span>
-          <span className="font-medium text-fraction-light-green">
+          <span className="font-medium text-fraction-green-400">
             {data?.status}
           </span>
         </div>
 
-        <div className="mt-1 text-sm text-fraction-gray-secondary">
+        <div className="mt-1 text-sm text-fraction-gray-280">
           <span>Remaining investment: </span>
           <span className="align-baseline text-2xl font-semibold tracking-tight text-white">
             ${data?.remaining.toLocaleString()}

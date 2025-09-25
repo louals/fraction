@@ -13,12 +13,12 @@ export default function StrategySection({
   return (
     <div className="space-y-4">
       {/* Section heading */}
-      <h3 className="text-[20px] font-semibold text-fraction-violet-600">
+      <h3 className="text-[20px] font-semibold text-fraction-violet-500">
         {headingsLabel}
       </h3>
 
       {/* List of expandable items */}
-      <div className="divide-y divide-gray-100  bg-white">
+      <div className="space-y-4 bg-white">
         {items.map((it, idx) => (
           <details key={idx} className="group open:bg-gray-50">
             {/* Summary row with label, value and chevron icon */}
@@ -33,7 +33,7 @@ export default function StrategySection({
                 className="shrink-0 transition-transform duration-200 group-open:rotate-180"
                 aria-hidden
               >
-                <ChevronDown className="h-4 w-4 text-gray-400" />
+                <ChevronDown className="h-4 w-4 text-fraction-gray-500" />
               </span>
             </summary>
 

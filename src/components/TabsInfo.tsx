@@ -4,6 +4,7 @@ import PropertyDetails from './PropertyDetails';
 import MapSection from './MapSection';
 import FinancesTab from './Finances/FinancesTab';
 import PerformanceTab from './PerformanceTab';
+import DocumentsTab from './DocumentsTab';
 
 // TabId: union type representing all valid tab identifiers
 type TabId = 'details' | 'finances' | 'performance' | 'documents';
@@ -47,7 +48,7 @@ export function TabsInfo() {
                 'rounded-full px-8 py-2 text-sm font-medium transition',
                 isActive
                   ? 'bg-fraction-violet-500 text-white shadow' // active styling
-                  : 'bg-white text-fraction-super-light-gray border border-fraction-gray-secondary hover:bg-gray-50', // inactive styling
+                  : 'bg-white text-fraction-gray-650 border border-fraction-gray-280 hover:bg-gray-50', // inactive styling
               ].join(' ')}
             >
               {t.label}
@@ -82,11 +83,8 @@ export function TabsInfo() {
 
         {active === 'documents' && (
           <div id="panel-documents">
-            {/* Simple placeholder for documents area */}
-            <h2 className="text-lg font-semibold text-gray-900">Documents</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Files and documents related to the product.
-            </p>
+            {/*  documents area */}
+            <DocumentsTab />
           </div>
         )}
       </section>
