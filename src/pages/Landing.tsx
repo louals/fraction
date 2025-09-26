@@ -14,7 +14,7 @@ export default function Landing(): React.ReactNode {
 
   return (
     <div>
-      <h2>Some projects</h2>
+      <h2 className='text-2xl'>Some projects</h2>
       <p>Some of your projects</p>
 
       <div className='grid gap-[20px] grid-cols-[repeat(auto-fit,minmax(300px,1fr))]'>
