@@ -1,61 +1,197 @@
-import React, { useState } from "react";
-import { FaGoogle, FaFacebook, FaApple } from "react-icons/fa";
-import { auth, db } from "../../firebase/firebase.ts";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import phone from "../../assets/images/phone.png";
-import logocomplet from "../../assets/images/logocomplet.png";
-import { useNavigate } from "react-router-dom";
-import Loader from "../loading/logo_loader.tsx";
+// src/components/auth/SignupPage.tsx
+import React, { useMemo, useState } from 'react';
+import {
+  FaGoogle,
+  FaFacebook,
+  FaApple,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaEye,
+  FaEyeSlash,
+} from 'react-icons/fa';
+import { auth } from '../../firebase/firebase.ts';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { ensureUserDoc } from './ensureUserDoc';
+import {
+  signInWithGoogle,
+  signInWithFacebook,
+  signInWithApple,
+} from './socialAuth';
 
+import phone from '../../assets/images/phone.png';
+import logocomplet from '../../assets/images/logocomplet.png';
+import { useNavigate } from 'react-router-dom';
+import Loader from '../loading/logo_loader.tsx';
+
+/**
+ * SignupPage
+ * - Email/password sign up with live password requirements
+ * - Social sign up (Google, Facebook, Apple)
+ * - Creates/updates a Firestore user document after successful registration
+ * - Includes password visibility toggle and accessibility attributes
+ */
 const SignupPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // --- Form fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // --- Checkboxes (consents/preferences)
   const [termsChecked, setTermsChecked] = useState(false);
   const [riskChecked, setRiskChecked] = useState(false);
   const [newsChecked, setNewsChecked] = useState(false);
+
+  // --- UI state
+  const [formError, setFormError] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // ✅ hook
+  const [pwFocused, setPwFocused] = useState(false);
+  const [showPw, setShowPw] = useState(false); // Toggles password visibility
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const navigate = useNavigate();
+
+  // --- Password live checks (computed from current input)
+  const checks = useMemo(() => {
+    return {
+      minLen: password.length >= 8, // Minimum length
+      upper: /[A-Z]/.test(password), // At least one uppercase letter
+      lower: /[a-z]/.test(password), // At least one lowercase letter
+      number: /\d/.test(password), // At least one number
+      symbol: /[^A-Za-z0-9]/.test(password), // At least one symbol
+    };
+  }, [password]);
+
+  // Whether all password requirements pass
+  const allPasswordValid = useMemo(
+    () => Object.values(checks).every(Boolean),
+    [checks]
+  );
+
+  // Dynamic input border styling based on password validity/focus
+  const inputBorderForPassword = useMemo(() => {
+    if (password.length === 0 && !pwFocused)
+      return 'border-gray-300 focus:ring-[#a052e0]';
+    return allPasswordValid
+      ? 'border-green-500 focus:ring-[#a052e0]'
+      : 'border-red-500 focus:ring-red-400';
+  }, [password.length, allPasswordValid, pwFocused]);
+
+  // --- Social handlers (Google/Facebook/Apple)
+  async function onGoogle() {
+    try {
+      setLoading(true);
+      await signInWithGoogle(auth, newsChecked);
+      navigate('/');
+    } catch (e: any) {
+      setFormError(e?.message ?? 'Google sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function onFacebook() {
+    try {
+      setLoading(true);
+      await signInWithFacebook(auth, newsChecked);
+      navigate('/');
+    } catch (e: any) {
+      setFormError(e?.message ?? 'Facebook sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+  async function onApple() {
+    try {
+      setLoading(true);
+      await signInWithApple(auth, newsChecked);
+      navigate('/');
+    } catch (e: any) {
+      setFormError(e?.message ?? 'Apple sign-in failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // --- Email/password form submit
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormError('');
 
+    // Mandatory consents
     if (!termsChecked || !riskChecked) {
-      alert("Please agree to the mandatory terms before signing up.");
+      setFormError('Please agree to the mandatory terms before signing up.');
+      return;
+    }
+
+    // Enforce password requirements
+    if (!allPasswordValid) {
+      setFormError('Please meet all password requirements.');
       return;
     }
 
     setLoading(true);
-
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      // Create Firebase user with email/password
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
 
-     
+      // Create/merge Firestore user profile
+      await ensureUserDoc(user, { marketingOptIn: newsChecked });
 
-      navigate("/login");
-      setEmail("");
-      setPassword("");
+      // Redirect to Login after successful signup
+      navigate('/login');
+
+      // Reset form state
+      setEmail('');
+      setPassword('');
       setTermsChecked(false);
       setRiskChecked(false);
       setNewsChecked(false);
     } catch (error: any) {
-      console.error("Error signing up:", error.message);
-      alert(error.message);
+      // Map Firebase error codes to user-friendly messages
+      const code = error?.code as string | undefined;
+      switch (code) {
+        case 'auth/email-already-in-use':
+          setFormError(
+            'This email is already registered. Try logging in or reset your password.'
+          );
+          break;
+        case 'auth/invalid-email':
+          setFormError('Enter a valid email address.');
+          break;
+        case 'auth/weak-password':
+          setFormError(
+            'Password is too weak. Please meet the requirements below.'
+          );
+          break;
+        case 'auth/network-request-failed':
+          setFormError(
+            'Network error. Please check your connection and try again.'
+          );
+          break;
+        default:
+          setFormError(
+            error?.message ?? 'Something went wrong. Please try again.'
+          );
+      }
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
+  // --- Render
   return (
     <div
       className="min-h-screen w-full flex items-center justify-center px-4 md:px-8"
       style={{
-        background: "linear-gradient(135deg, #E4E5FF, #F3BBCE9D, #FF99A54D)",
+        // Soft background gradient
+        background: 'linear-gradient(135deg, #E4E5FF, #F3BBCE9D, #FF99A54D)',
       }}
     >
       <div className="flex flex-col md:flex-row w-full max-w-[1600px] justify-between items-center">
         {/* Left - Form Card */}
         <div className="w-full md:w-6/12 bg-white rounded-3xl shadow-2xl flex flex-col justify-center p-6 md:p-12 mb-10 md:mb-0 h-auto md:h-[790px]">
+          {/* Logo + Title */}
           <div className="mb-6 text-center">
             <img
               src={logocomplet}
@@ -67,54 +203,149 @@ const SignupPage = () => {
             </p>
           </div>
 
-          {/* Social Login */}
+          {/* Social Login (icons only) */}
           <div className="mb-4 flex flex-col">
-            <p className="text-sm text-gray-600 mb-2 text-left">With social:</p>
             <div className="flex justify-center gap-4">
-              <button className="flex items-center justify-center transition-colors rounded-lg p-2 hover:bg-gray-100">
+              <button
+                onClick={onGoogle}
+                className="flex items-center justify-center transition-colors rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
+                disabled={loading}
+                aria-label="Sign up with Google"
+              >
                 <FaGoogle size={40} />
               </button>
-              <button className="flex items-center justify-center transition-colors rounded-lg p-2 hover:bg-gray-100">
+              <button
+                onClick={onFacebook}
+                className="flex items-center justify-center transition-colors rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
+                disabled={loading}
+                aria-label="Sign up with Facebook"
+              >
                 <FaFacebook size={40} />
               </button>
-              <button className="flex items-center justify-center transition-colors rounded-lg p-2 hover:bg-gray-100">
+              <button
+                onClick={onApple}
+                className="flex items-center justify-center transition-colors rounded-lg p-2 hover:bg-gray-100 disabled:opacity-50"
+                disabled={loading}
+                aria-label="Sign up with Apple"
+              >
                 <FaApple size={40} />
               </button>
             </div>
           </div>
 
+          {/* Divider */}
           <div className="flex items-center gap-4 mb-6">
             <hr className="flex-1 border-transparent" />
-            <span className="text-[#FF99A5] text-xl md:text-[32px] font-semibold">or</span>
+            <span className="text-[#FF99A5] text-xl md:text-[32px] font-semibold">
+              or
+            </span>
             <hr className="flex-1 border-transparent" />
           </div>
 
-          {/* Email + Password */}
-          <div className="flex flex-col gap-4">
+          {/* Email + Password form */}
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={handleSubmit}
+            noValidate
+          >
+            {/* Email input */}
             <input
               type="email"
               placeholder="Enter e-mail here ..."
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a052e0] placeholder-gray-400"
+              required
             />
 
-            <input
-              type="password"
-              placeholder="Password ..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a052e0] placeholder-gray-400"
-            />
+            {/* Password input + live requirements */}
+            <div className="relative">
+              {/* Password input (right padding reserved for eye icon) */}
+              <input
+                type={showPw ? 'text' : 'password'} // Toggle type based on show/hide
+                placeholder="Password ..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setPwFocused(true)}
+                onBlur={() => setPwFocused(false)}
+                className={`w-full p-3 pr-11 border rounded-lg focus:outline-none focus:ring-2 placeholder-gray-400 ${inputBorderForPassword}`}
+                minLength={8}
+                required
+                aria-describedby="pw-reqs"
+              />
 
-            {/* Checkboxes */}
-            <div className="flex flex-col gap-2 mt-4">
+              {/* Eye icon button to toggle password visibility */}
+              <button
+                type="button"
+                onClick={() => setShowPw((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100"
+                aria-label={showPw ? 'Hide password' : 'Show password'}
+                disabled={loading}
+              >
+                {showPw ? <FaEyeSlash /> : <FaEye />}
+              </button>
+
+              {/* Requirements list — visible on focus or once user starts typing */}
+              {(pwFocused || password.length > 0) && (
+                <ul
+                  id="pw-reqs"
+                  className="mt-2 text-sm space-y-1"
+                  aria-live="polite"
+                  role="list"
+                >
+                  <li
+                    className={`flex items-center gap-2 ${
+                      checks.minLen ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {checks.minLen ? <FaCheckCircle /> : <FaTimesCircle />}
+                    <span>Use at least 8 characters</span>
+                  </li>
+                  <li
+                    className={`flex items-center gap-2 ${
+                      checks.upper ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {checks.upper ? <FaCheckCircle /> : <FaTimesCircle />}
+                    <span>Add at least one uppercase letter</span>
+                  </li>
+                  <li
+                    className={`flex items-center gap-2 ${
+                      checks.lower ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {checks.lower ? <FaCheckCircle /> : <FaTimesCircle />}
+                    <span>Add at least one lowercase letter</span>
+                  </li>
+                  <li
+                    className={`flex items-center gap-2 ${
+                      checks.number ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {checks.number ? <FaCheckCircle /> : <FaTimesCircle />}
+                    <span>Add at least one number</span>
+                  </li>
+                  <li
+                    className={`flex items-center gap-2 ${
+                      checks.symbol ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {checks.symbol ? <FaCheckCircle /> : <FaTimesCircle />}
+                    <span>Add at least one symbol</span>
+                  </li>
+                </ul>
+              )}
+            </div>
+
+            {/* Consents / Preferences */}
+            <div className="flex flex-col gap-2 mt-2">
               <label className="flex items-center gap-2 text-gray-700 text-sm cursor-pointer">
                 <input
                   type="checkbox"
                   checked={termsChecked}
                   onChange={() => setTermsChecked(!termsChecked)}
                   className="w-4 h-4 accent-[#3A3178]"
+                  required
                 />
                 I have read and I agree with the terms of confidentiality
               </label>
@@ -125,6 +356,7 @@ const SignupPage = () => {
                   checked={riskChecked}
                   onChange={() => setRiskChecked(!riskChecked)}
                   className="w-4 h-4 accent-[#3A3178]"
+                  required
                 />
                 I’m conscious of the risk of investments
               </label>
@@ -140,26 +372,38 @@ const SignupPage = () => {
               </label>
             </div>
 
+            {/* Form-level error */}
+            {formError && <p className="text-xs text-red-600">{formError}</p>}
+
+            {/* Submit button */}
             <button
-              onClick={handleSubmit}
-              disabled={loading || !termsChecked || !riskChecked}
-              className={`w-full md:w-[230px] bg-[#3A3178] text-white py-3 rounded-[21.5px] mx-auto mt-4 transition flex justify-center items-center ${
-                loading || !termsChecked || !riskChecked ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
+              type="submit"
+              disabled={
+                loading || !termsChecked || !riskChecked || !allPasswordValid
+              }
+              className={`w-full md:w-[230px] bg-[#3A3178] text-white py-3 rounded-[21.5px] mx-auto mt-3 transition flex justify-center items-center ${
+                loading || !termsChecked || !riskChecked || !allPasswordValid
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:opacity-90'
               }`}
             >
-              {loading ? <Loader/> : "Sign up"}
+              {loading ? <Loader /> : 'Sign up'}
             </button>
 
+            {/* Link to login */}
             <p className="text-center text-sm text-gray-600 mt-2">
-              Go to{" "}
-              <a href="/login" className="text-[#3b3b64] font-medium hover:underline">
+              Go to{' '}
+              <a
+                href="/login"
+                className="text-[#3b3b64] font-medium hover:underline"
+              >
                 Login
               </a>
             </p>
-          </div>
+          </form>
         </div>
 
-        {/* Right - Phone with floating rectangles */}
+        {/* Right - Phone mockup with floating rectangles */}
         <div className="hidden md:flex w-full md:w-5/12 items-center justify-end relative">
           <div className="relative">
             <img
@@ -168,13 +412,12 @@ const SignupPage = () => {
               className="relative z-10 w-[300px] md:w-[458px] h-auto mr-4 md:mr-12"
             />
           </div>
-          {/* Floating rectangles... keep as-is */}
-           <div className="absolute top-[60%] right-[60%] w-[138px] h-[82px] rounded-lg border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-50" />
+          <div className="absolute top-[60%] right-[60%] w-[138px] h-[82px] rounded-lg border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-50" />
           <div className="absolute top-[16%] right-[15%] w-[98px] h-[56px] rounded-lg border border-white/60 backdrop-blur-[2px] bg-white/70 shadow-lg z-20" />
           <div className="absolute top-[18%] right-[25%] w-16 h-12 rounded-lg border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg" />
           <div className="absolute top-[12%] left-[38%] w-[26px] h-[21px] rounded-[5px] border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-40" />
           <div className="absolute top-[15%] left-[33%] w-[47px] h-[39px] rounded-lg border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-30" />
-          <div className="absolute top-[19%] left-[36%] w-[60px] h-[40px] rounded-lg border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-0" />
+          <div className="absolute top-[19%] left-[36%] w-[60px] h-[40px] rounded-[5px] border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-0" />
           <div className="absolute bottom-[33%] right-[76%] w-[86px] h-[74px] rounded-[10px] border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-50" />
           <div className="absolute top-[10%] right-[12%] w-[56px] h-[40px] rounded-lg border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-30" />
           <div className="absolute top-[5%] right-[18%] w-[40px] h-[40px] rounded-lg border border-white/60 backdrop-blur-[2px] bg-white/60 shadow-lg z-50" />
