@@ -12,17 +12,19 @@ import { Dashboard } from './pages/Dashboard';
 import { OneProductDetails } from './pages/OneProductDetails';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
+import RequestPasswordResetForm from './components/auth/RequestPasswordResetForm';
+import ConfirmPasswordResetPage from './components/auth/ConfirmPasswordResetPage';
 import ErrorPage from './pages/ErrorPage';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 function App() {
   return (
-    <div className='relative h-screen'>
+    <div className="relative h-screen">
       <BrowserRouter>
         <Routes>
           {/* Ladnging route - Wrapped in LadingLayout */}
           <Route
-            path='/'
+            path="/"
             element={
               <LandingLayout>
                 <Landing />
@@ -31,7 +33,7 @@ function App() {
           />
           {/* Auth routes - full page */}
           <Route
-            path='/login'
+            path="/login"
             element={
               <AuthLayout>
                 <LoginPage />
@@ -39,7 +41,7 @@ function App() {
             }
           />
           <Route
-            path='/signup'
+            path="/signup"
             element={
               <AuthLayout>
                 <SignupPage />
@@ -49,7 +51,7 @@ function App() {
 
           {/* Main app routes - wrapped in MainLayout */}
           <Route
-            path='/'
+            path="/"
             element={
               <MainLayout>
                 <Home />
@@ -57,7 +59,7 @@ function App() {
             }
           />
           <Route
-            path='/invest'
+            path="/invest"
             element={
               <MainLayout>
                 <Invest />
@@ -65,7 +67,7 @@ function App() {
             }
           />
           <Route
-            path='/dashboard'
+            path="/dashboard"
             element={
               <DashboardLayout2>
                 <Dashboard />
@@ -73,7 +75,7 @@ function App() {
             }
           />
           <Route
-            path='/oneProductDetails'
+            path="/oneProductDetails"
             element={
               <MainLayout>
                 <OneProductDetails />
@@ -81,12 +83,21 @@ function App() {
             }
           />
           <Route
-            path='/404'
+            path="/404"
             element={
               <DashboardLayout2>
                 <ErrorPage />
               </DashboardLayout2>
             }
+          />
+
+          <Route
+            path="/forgot-password"
+            element={<RequestPasswordResetForm />}
+          />
+          <Route
+            path="/reset-password"
+            element={<ConfirmPasswordResetPage />}
           />
         </Routes>
       </BrowserRouter>
