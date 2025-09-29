@@ -28,7 +28,8 @@ import Loader from '../loading/logo_loader.tsx';
  * - Email/password sign up with live password requirements
  * - Social sign up (Google, Facebook, Apple)
  * - Creates/updates a Firestore user document after successful registration
- * - Includes password visibility toggle and accessibility attributes
+ * - Password visibility toggle (eye icon) that stays aligned
+ * - Accessibility-friendly error hints
  */
 const SignupPage = () => {
   // --- Form fields
@@ -44,18 +45,18 @@ const SignupPage = () => {
   const [formError, setFormError] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [pwFocused, setPwFocused] = useState(false);
-  const [showPw, setShowPw] = useState(false); // Toggles password visibility
+  const [showPw, setShowPw] = useState(false); // Toggle password visibility
 
   const navigate = useNavigate();
 
-  // --- Password live checks (computed from current input)
+  // --- Password live checks (computed from current value)
   const checks = useMemo(() => {
     return {
-      minLen: password.length >= 8, // Minimum length
-      upper: /[A-Z]/.test(password), // At least one uppercase letter
-      lower: /[a-z]/.test(password), // At least one lowercase letter
-      number: /\d/.test(password), // At least one number
-      symbol: /[^A-Za-z0-9]/.test(password), // At least one symbol
+      minLen: password.length >= 8,
+      upper: /[A-Z]/.test(password),
+      lower: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      symbol: /[^A-Za-z0-9]/.test(password),
     };
   }, [password]);
 
@@ -67,14 +68,15 @@ const SignupPage = () => {
 
   // Dynamic input border styling based on password validity/focus
   const inputBorderForPassword = useMemo(() => {
-    if (password.length === 0 && !pwFocused)
+    if (password.length === 0 && !pwFocused) {
       return 'border-gray-300 focus:ring-[#a052e0]';
+    }
     return allPasswordValid
       ? 'border-green-500 focus:ring-[#a052e0]'
-      : 'border-red-500 focus:ring-red-400';
+      : 'border-fraction-light-600 focus:ring-[#a052e0]';
   }, [password.length, allPasswordValid, pwFocused]);
 
-  // --- Social handlers (Google/Facebook/Apple)
+  // --- Social handlers
   async function onGoogle() {
     try {
       setLoading(true);
@@ -109,7 +111,7 @@ const SignupPage = () => {
     }
   }
 
-  // --- Email/password form submit
+  // --- Email/password submit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError('');
@@ -184,7 +186,6 @@ const SignupPage = () => {
     <div
       className="min-h-screen w-full flex items-center justify-center px-4 md:px-8"
       style={{
-        // Soft background gradient
         background: 'linear-gradient(135deg, #E4E5FF, #F3BBCE9D, #FF99A54D)',
       }}
     >
@@ -258,44 +259,49 @@ const SignupPage = () => {
               required
             />
 
-            {/* Password input + live requirements */}
-            <div className="relative">
-              {/* Password input (right padding reserved for eye icon) */}
-              <input
-                type={showPw ? 'text' : 'password'} // Toggle type based on show/hide
-                placeholder="Password ..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onFocus={() => setPwFocused(true)}
-                onBlur={() => setPwFocused(false)}
-                className={`w-full p-3 pr-11 border rounded-lg focus:outline-none focus:ring-2 placeholder-gray-400 ${inputBorderForPassword}`}
-                minLength={8}
-                required
-                aria-describedby="pw-reqs"
-              />
+            {/* Password input + eye icon (kept aligned) + live requirements (as sibling) */}
+            <div className="space-y-2">
+              {/* Only input + eye inside the relative wrapper so the eye stays centered */}
+              <div className="relative">
+                <input
+                  type={showPw ? 'text' : 'password'}
+                  placeholder="Password ..."
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setPwFocused(true)}
+                  onBlur={() => setPwFocused(false)}
+                  className={`w-full h-12 p-3 pr-11 border rounded-lg focus:outline-none focus:ring-2 placeholder-gray-400 ${inputBorderForPassword}`}
+                  minLength={8}
+                  required
+                  aria-describedby="pw-reqs"
+                />
 
-              {/* Eye icon button to toggle password visibility */}
-              <button
-                type="button"
-                onClick={() => setShowPw((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100"
-                aria-label={showPw ? 'Hide password' : 'Show password'}
-                disabled={loading}
-              >
-                {showPw ? <FaEyeSlash /> : <FaEye />}
-              </button>
+                {/* Eye icon: prevent input from losing focus on mouse down to avoid flicker */}
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-gray-100"
+                  aria-label={showPw ? 'Hide password' : 'Show password'}
+                  disabled={loading}
+                >
+                  {showPw ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
 
-              {/* Requirements list — visible on focus or once user starts typing */}
+              {/* Requirements list is a sibling (not inside the relative box) */}
               {(pwFocused || password.length > 0) && (
                 <ul
                   id="pw-reqs"
-                  className="mt-2 text-sm space-y-1"
+                  className="text-sm space-y-1"
                   aria-live="polite"
                   role="list"
                 >
                   <li
                     className={`flex items-center gap-2 ${
-                      checks.minLen ? 'text-green-600' : 'text-red-600'
+                      checks.minLen
+                        ? 'text-green-600'
+                        : 'text-fraction-light-600'
                     }`}
                   >
                     {checks.minLen ? <FaCheckCircle /> : <FaTimesCircle />}
@@ -303,7 +309,9 @@ const SignupPage = () => {
                   </li>
                   <li
                     className={`flex items-center gap-2 ${
-                      checks.upper ? 'text-green-600' : 'text-red-600'
+                      checks.upper
+                        ? 'text-green-600'
+                        : 'text-fraction-light-600'
                     }`}
                   >
                     {checks.upper ? <FaCheckCircle /> : <FaTimesCircle />}
@@ -311,7 +319,9 @@ const SignupPage = () => {
                   </li>
                   <li
                     className={`flex items-center gap-2 ${
-                      checks.lower ? 'text-green-600' : 'text-red-600'
+                      checks.lower
+                        ? 'text-green-600'
+                        : 'text-fraction-light-600'
                     }`}
                   >
                     {checks.lower ? <FaCheckCircle /> : <FaTimesCircle />}
@@ -319,7 +329,9 @@ const SignupPage = () => {
                   </li>
                   <li
                     className={`flex items-center gap-2 ${
-                      checks.number ? 'text-green-600' : 'text-red-600'
+                      checks.number
+                        ? 'text-green-600'
+                        : 'text-fraction-light-600'
                     }`}
                   >
                     {checks.number ? <FaCheckCircle /> : <FaTimesCircle />}
@@ -327,7 +339,9 @@ const SignupPage = () => {
                   </li>
                   <li
                     className={`flex items-center gap-2 ${
-                      checks.symbol ? 'text-green-600' : 'text-red-600'
+                      checks.symbol
+                        ? 'text-green-600'
+                        : 'text-fraction-light-600'
                     }`}
                   >
                     {checks.symbol ? <FaCheckCircle /> : <FaTimesCircle />}
@@ -373,7 +387,9 @@ const SignupPage = () => {
             </div>
 
             {/* Form-level error */}
-            {formError && <p className="text-xs text-red-600">{formError}</p>}
+            {formError && (
+              <p className="text-xs text-fraction-light-600">{formError}</p>
+            )}
 
             {/* Submit button */}
             <button
