@@ -2,7 +2,7 @@ import NavMain from '../components/NavMain';
 import FooterMain from '../components/FooterMain';
 import React from 'react';
 
-const DashboardLayout2 = ({ children }: { children: React.ReactNode }) => {
+const SpaciousLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className='relative h-screen'>
       {/* Background image */}
@@ -23,4 +23,4 @@ const DashboardLayout2 = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default DashboardLayout2;
+export default SpaciousLayout;

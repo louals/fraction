@@ -1,10 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
-import DashboardLayout from './layouts/DashboardLayout';
-import DashboardLayout2 from './layouts/DashboardLayout2';
 import LandingLayout from './layouts/LandingLayout';
-
+import SpaciousLayout from './layouts/SpaciousLayout';
 import Landing from './pages/Landing';
 import { Home } from './pages/Home';
 import { Invest } from './pages/Invest';
@@ -14,6 +12,7 @@ import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
 import RequestPasswordResetForm from './components/auth/RequestPasswordResetForm';
 import ConfirmPasswordResetPage from './components/auth/ConfirmPasswordResetPage';
+import SellProperty from './pages/property/SellProperty';
 import ErrorPage from './pages/ErrorPage';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -69,9 +68,9 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              <DashboardLayout2>
+              <SpaciousLayout>
                 <Dashboard />
-              </DashboardLayout2>
+              </SpaciousLayout>
             }
           />
           <Route
@@ -85,9 +84,18 @@ function App() {
           <Route
             path="/404"
             element={
-              <DashboardLayout2>
+              <SpaciousLayout>
                 <ErrorPage />
-              </DashboardLayout2>
+              </SpaciousLayout>
+            }
+          />
+          {/** Routes for property */}
+          <Route
+            path="/sell"
+            element={
+              <SpaciousLayout>
+                <SellProperty />
+              </SpaciousLayout>
             }
           />
 

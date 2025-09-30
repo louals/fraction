@@ -7,9 +7,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     <div className='relative h-screen'>
       {/* Background image */}
       <img
-        src='/assets/img/backgroundDashboard.png'
+        src='/assets/img/brand-fraction-img-top.png'
         alt='background'
-        className='absolute inset-0 -z-10 w-full object-cover pointer-events-none max-h-[160px]'
+        className='absolute inset-0 -z-10 w-full object-cover pointer-events-none [mask-image:linear-gradient(to_bottom,black_80%,transparent_100%)]
+               [mask-repeat:no-repeat] [mask-size:100%_100%]'
       />
 
       {/* Grid layout */}
