@@ -1,5 +1,8 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase/firebase';
+import { useNavigate } from 'react-router-dom';
 
 import LockPasswordIcon from '../../assets/icons/lock-password.svg?react';
 import EyeOpenIcon from '../../assets/icons/eye-open.svg?react';
@@ -10,6 +13,32 @@ export default function PasswordSecuritySettings(): React.ReactNode {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [password, setPassword] = useState('test123');
+
+  // UI pour le logout
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  /**
+   * Déconnecte l'utilisateur courant via Firebase Auth.
+   * - Appelle signOut(auth)
+   * - Gère l'état de chargement et d'erreur
+   * - Redirige après succès (ici vers '/')
+   *
+   * @returns Promise<void>
+   */
+  async function handleLogout(): Promise<void> {
+    try {
+      setLogoutError(null);
+      setLogoutLoading(true);
+      await signOut(auth);
+      navigate('/login'); // ou window.location.assign('/')
+    } catch (err) {
+      setLogoutError('Unable to log out. Please try again.');
+    } finally {
+      setLogoutLoading(false);
+    }
+  }
 
   /**
    * Gère la soumission du formulaire Password
@@ -120,13 +149,27 @@ export default function PasswordSecuritySettings(): React.ReactNode {
             Account Security
           </h3>
           <div className='flex flex-row gap-x-5 mt-2'>
-            <button className='max-w-max border-[2px] border-transparent bg-[var(--color-fraction-violet-500)] rounded-xl text-white px-4 py-2 hover:bg-white hover:border-[var(--color-fraction-violet-500)] hover:text-[var(--color-fraction-violet-500)] transition duration-300 cursor-pointer'>
-              Log out
+            {/* 👇 Bouton logout branché */}
+            <button
+              onClick={handleLogout}
+              disabled={logoutLoading}
+              aria-busy={logoutLoading}
+              className='max-w-max border-[2px] border-transparent bg-[var(--color-fraction-violet-500)] rounded-xl text-white px-4 py-2 hover:bg-white hover:border-[var(--color-fraction-violet-500)] hover:text-[var(--color-fraction-violet-500)] transition duration-300 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed'
+            >
+              {logoutLoading ? 'Logging out…' : 'Log out'}
             </button>
-            <button className='max-w-max border-[2px] border-red-500 bg-white rounded-xl text-red-500 px-4 py-2 hover:bg-red-500 bg-red-500 hover:border-transparent hover:text-white transition duration-300 cursor-pointer'>
+
+            <button className='max-w-max border-[2px] border-red-500 bg-white rounded-xl text-red-500 px-4 py-2 hover:bg-red-500 hover:border-transparent hover:text-white transition duration-300 cursor-pointer'>
               Delete my account
             </button>
           </div>
+
+          {/* Message d'erreur éventuel */}
+          {logoutError && (
+            <p className='mt-2 text-red-600' role='alert' aria-live='polite'>
+              {logoutError}
+            </p>
+          )}
         </div>
       </div>
     </div>
