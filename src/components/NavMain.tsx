@@ -73,7 +73,7 @@ function NavMain() {
 
                 {/* CTA: Buy (outlined → filled on hover) */}
                 <Link
-                  to="/buy"
+                  to="/invest"
                   style={greenVars}
                   className="inline-flex items-center justify-center rounded-3xl px-6 py-2
                   border-2 select-none transition ease-out motion-safe:duration-200
