@@ -1,7 +1,6 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import ProfilButton from './ProfilButton';
-import { ChevronDownIcon } from '@heroicons/react/24/solid'; // Unused: safe to remove if not needed
 import type { ButtonVars } from '../types/ui';
 import { AuthContext } from './auth/AuthContext';
 
