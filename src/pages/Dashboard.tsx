@@ -6,10 +6,10 @@ import LockIcon from '../assets/icons/lock.svg?react';
 import UserIcon from '../assets/icons/user.svg?react';
 import BellIcon from '../assets/icons/bell.svg?react';
 import HelpIcon from '../assets/icons/help.svg?react';
-import AccountSettings from '../components/dashboard/AccountSettings';
-import PayementSettings from '../components/dashboard/PayementSettings';
-import PasswordSecuritySettings from '../components/dashboard/PasswordSecuritySettings';
-import HelpCenterSettings from '../components/dashboard/HelpCenterSettings';
+import AccountSettings from '../components/profil/AccountSettings';
+import PayementSettings from '../components/profil/PayementSettings';
+import PasswordSecuritySettings from '../components/profil/PasswordSecuritySettings';
+import HelpCenterSettings from '../components/profil/HelpCenterSettings';
 
 type TabKey =
   | 'account'

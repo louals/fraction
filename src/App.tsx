@@ -11,12 +11,12 @@ import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
 import RequestPasswordResetForm from './components/auth/RequestPasswordResetForm';
 import ConfirmPasswordResetPage from './components/auth/ConfirmPasswordResetPage';
-import SellProperty from './pages/property/SellProperty';
 import ErrorPage from './pages/ErrorPage';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import AuthProvider from '../src/components/auth/AuthProvider';
 import RequireAuth from '../src/components/auth/RequireAuth';
 import { PublicOnly } from '../src/components/auth/PublicOnly';
+import PropertySell from './pages/property/SellProperty';
 
 function App() {
   return (
@@ -40,7 +40,7 @@ function App() {
               element={
                 <RequireAuth>
                   <SpaciousLayout>
-                    <SellProperty />
+                    <PropertySell />
                   </SpaciousLayout>
                 </RequireAuth>
               }
