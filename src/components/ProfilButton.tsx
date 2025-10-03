@@ -119,7 +119,7 @@ export default function ProfilButton() {
           id={menuId}
           role="menu"
           aria-labelledby={btnId}
-          className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-200 bg-white
+          className="absolute right-0  w-48 rounded-xl border border-fraction-gray-200 bg-white
                      p-1.5 shadow-lg ring-1 ring-black/5 z-50"
         >
           <Link
