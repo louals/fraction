@@ -1,10 +1,17 @@
 type Step = { number: 1 | 2 | 3; label: string };
+
 export type StepCirclesProps = {
   current: 1 | 2 | 3;
   steps?: Step[];
 };
 
-export function StepCircles({
+/**
+ * StepCircles
+ * - Matches sample style (outlined circles, active/inactive colors, RTL-aware)
+ * - Step data (labels and numbers) are passed via props
+ * - Responsive: vertical on mobile, horizontal from sm and up
+ */
+export default function StepCircles({
   current,
   steps = [
     { number: 1, label: 'Infos & Photos' },
@@ -13,28 +20,42 @@ export function StepCircles({
   ],
 }: StepCirclesProps) {
   return (
-    <ol className='flex items-center gap-6' aria-label='Progression'>
+    <ol
+      className="items-center w-full space-y-4 sm:flex sm:space-x-8 sm:space-y-0 rtl:space-x-reverse"
+      aria-label="Progression"
+    >
       {steps.map((s) => {
         const active = s.number <= current;
         return (
-          <li key={s.number} className='flex items-center gap-3'>
+          <li
+            key={s.number}
+            className={[
+              'flex items-center space-x-2.5 rtl:space-x-reverse',
+              active
+                ? 'text-[var(--color-fraction-violet-600)] dark:text-[var(--color-fraction-violet-400)]'
+                : 'text-slate-500 dark:text-slate-400',
+            ].join(' ')}
+          >
             <span
               className={[
-                'grid size-8 place-items-center rounded-full border-2 text-sm font-semibold',
+                'flex items-center justify-center w-8 h-8 rounded-full shrink-0 border',
                 active
-                  ? 'bg-[var(--color-fraction-violet-500)] text-white border-transparent'
-                  : 'bg-white text-[var(--color-fraction-violet-500)] border-[var(--color-fraction-violet-500)]',
+                  ? 'border-[var(--color-fraction-violet-600)] dark:border-[var(--color-fraction-violet-400)]'
+                  : 'border-slate-500 dark:border-slate-400',
               ].join(' ')}
               aria-current={s.number === current ? 'step' : undefined}
             >
               {s.number}
             </span>
-            <span className='text-sm'>{s.label}</span>
+
+            <span>
+              <h3 className="font-medium leading-tight">{s.label}</h3>
+              {/* Optional subtitle/description: uncomment to use */}
+              {/* <p className="text-sm opacity-80">Details for this step</p> */}
+            </span>
           </li>
         );
       })}
     </ol>
   );
 }
-
-export default StepCircles;
