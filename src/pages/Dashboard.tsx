@@ -6,10 +6,10 @@ import LockIcon from '../assets/icons/lock.svg?react';
 import UserIcon from '../assets/icons/user.svg?react';
 import BellIcon from '../assets/icons/bell.svg?react';
 import HelpIcon from '../assets/icons/help.svg?react';
-import AccountSettings from '../components/dashboard/AccountSettings';
-import PayementSettings from '../components/dashboard/PayementSettings';
-import PasswordSecuritySettings from '../components/dashboard/PasswordSecuritySettings';
-import HelpCenterSettings from '../components/dashboard/HelpCenterSettings';
+import AccountSettings from '../components/profil/AccountSettings';
+import PayementSettings from '../components/profil/PayementSettings';
+import PasswordSecuritySettings from '../components/profil/PasswordSecuritySettings';
+import HelpCenterSettings from '../components/profil/HelpCenterSettings';
 
 type TabKey =
   | 'account'
@@ -22,9 +22,9 @@ type NavItem = { key: TabKey; label: string; icon: React.ReactNode };
 
 function Placeholder({ title }: { title: string }): React.ReactNode {
   return (
-    <div className='rounded-xl border border-dashed border-gray-300 bg-white p-8 text-gray-600'>
-      <p className='text-lg'>
-        <span className='font-semibold'>{title}</span> — contenu à définir.
+    <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-gray-600">
+      <p className="text-lg">
+        <span className="font-semibold">{title}</span> — contenu à définir.
       </p>
     </div>
   );
@@ -39,46 +39,46 @@ export function Dashboard(): React.ReactNode {
     {
       key: 'account',
       label: 'Account setting',
-      icon: <GearIcon className='size-4' />,
+      icon: <GearIcon className="size-4" />,
     },
-    { key: 'payment', label: 'Payment', icon: <CardIcon className='size-4' /> },
+    { key: 'payment', label: 'Payment', icon: <CardIcon className="size-4" /> },
     {
       key: 'security',
       label: 'Password & security',
-      icon: <LockIcon className='size-4' />,
+      icon: <LockIcon className="size-4" />,
     },
     {
       key: 'personal',
       label: 'Personal Information',
-      icon: <UserIcon className='size-4' />,
+      icon: <UserIcon className="size-4" />,
     },
     {
       key: 'notification',
       label: 'Notification',
-      icon: <BellIcon className='size-4' />,
+      icon: <BellIcon className="size-4" />,
     },
     {
       key: 'help',
       label: 'Help Center',
-      icon: <HelpIcon className='size-4' />,
+      icon: <HelpIcon className="size-4" />,
     },
   ];
 
   return (
     <div>
-      <h1 className='text-4xl font-bold text-[var(--color-fraction-violet-500)]'>
+      <h1 className="text-4xl font-bold text-[var(--color-fraction-violet-500)]">
         Settings
       </h1>
 
-      <div className='flex flex-row mt-20 gap-12'>
+      <div className="flex flex-row mt-20 gap-12">
         {/* Nav à gauche */}
-        <aside className='space-y-3 border-r-[2px] pr-12 border-[var(--color-fraction-light-500)]'>
+        <aside className="space-y-3 border-r-[2px] pr-12 border-[var(--color-fraction-light-500)]">
           {nav.map((item) => {
             const isActive = active === item.key;
             return (
               <button
                 key={item.key}
-                type='button'
+                type="button"
                 onClick={() => setActive(item.key)}
                 className={[
                   'w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition text-[var(--color-fraction-light-500)]',
@@ -103,15 +103,15 @@ export function Dashboard(): React.ReactNode {
         </aside>
 
         {/* Contenu à droite */}
-        <section className='relative grow'>
-          <div className=''>
+        <section className="relative grow">
+          <div className="">
             {active === 'account' && <AccountSettings />}
             {active === 'payment' && <PayementSettings />}
             {active === 'security' && <PasswordSecuritySettings />}
             {active === 'personal' && (
-              <Placeholder title='Personal Information' />
+              <Placeholder title="Personal Information" />
             )}
-            {active === 'notification' && <Placeholder title='Notification' />}
+            {active === 'notification' && <Placeholder title="Notification" />}
             {active === 'help' && <HelpCenterSettings />}
           </div>
         </section>
