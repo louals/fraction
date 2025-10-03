@@ -27,31 +27,42 @@ import logocomplet from '../../assets/images/logocomplet.png';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../loading/logo_loader.tsx';
 
-// Regex for validating email addresses
+// Basic e-mail pattern used for UI validation (Firebase still validates on server)
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/**
+ * Remove invisible unicode (RTL/zero-width), all whitespace and normalize casing.
+ * This fixes cases where Firebase returns "invalid-email" although the visible text looks fine.
+ */
+const sanitizeEmail = (raw: string) =>
+  raw
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\u2060\uFEFF\u061C\u200E\u200F]/g, '')
+    .replace(/\s+/g, '')
+    .toLowerCase();
+
 export default function LoginPage() {
-  // Form state
+  // ----- Form state
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState<string>('');
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string>('');
   const [formError, setFormError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // UI helpers
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(true);
   const [capsOn, setCapsOn] = useState(false);
 
   const navigate = useNavigate();
 
-  // Validate email format and required field
+  // ----- Simple client-side validators
   function validateEmail(value: string): string {
     if (!value) return 'Please enter your email.';
     if (!emailRegex.test(value)) return 'Enter a valid email address.';
     return '';
   }
-
-  // Validate password required field
   function validatePassword(value: string): string {
     if (!value) return 'Please enter your password.';
     return '';
@@ -62,8 +73,11 @@ export default function LoginPage() {
     e.preventDefault();
     setFormError('');
 
-    // Run client-side validations
-    const eErr = validateEmail(email.trim());
+    // Always sanitize before validating/submitting
+    const cleanedEmail = sanitizeEmail(email);
+
+    // Client-side validation
+    const eErr = validateEmail(cleanedEmail);
     const pErr = validatePassword(password);
     setEmailError(eErr);
     setPasswordError(pErr);
@@ -71,7 +85,7 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      // Set persistence based on "Remember me"
+      // Choose persistence by "Remember me"
       await setPersistence(
         auth,
         remember ? browserLocalPersistence : browserSessionPersistence
@@ -80,54 +94,83 @@ export default function LoginPage() {
       // Attempt Firebase email/password sign-in
       const cred = await signInWithEmailAndPassword(
         auth,
-        email.trim(),
+        cleanedEmail,
         password
       );
 
-      // Ensure Firestore user profile is created/updated
+      // Ensure Firestore user profile exists/updated (roles, timestamps, etc.)
       await ensureUserDoc(cred.user);
 
-      // Redirect to home
+      // Done → go home
       navigate('/');
     } catch (error: any) {
       const code = error?.code as string | undefined;
 
-      // Reset field-specific errors before assigning new ones
+      // Clear field-specific errors before setting new ones
       setEmailError('');
       setPasswordError('');
+      setFormError('');
+
+      // Helper to print friendly provider names
+      const providerLabel = (pid: string) =>
+        pid === 'google.com'
+          ? 'Google'
+          : pid === 'facebook.com'
+          ? 'Facebook'
+          : pid === 'apple.com'
+          ? 'Apple'
+          : pid === 'password'
+          ? 'Email/Password'
+          : pid;
 
       switch (code) {
         case 'auth/invalid-email':
+          // If we still hit this after sanitize/regex → it's truly malformed
           setEmailError('Enter a valid email address.');
           break;
 
-        // In new versions, invalid-credential may replace user-not-found/wrong-password
+        // New SDKs often return invalid-credential for wrong-password or user-not-found
         case 'auth/invalid-credential':
-        case 'auth/wrong-password': {
+        case 'auth/wrong-password':
+        case 'auth/user-not-found': {
           try {
-            // Check what sign-in methods exist for this email
+            // Disambiguate without leaking existence too much
             const methods = await fetchSignInMethodsForEmail(
               auth,
-              email.trim()
+              cleanedEmail
             );
 
-            if (!methods || methods.length === 0) {
-              // No account exists for this email
-              setEmailError('No account found for this email.');
+            if (methods && methods.length > 0) {
+              const hasPassword = methods.includes('password');
+              const otherProviders = methods
+                .filter((m) => m !== 'password')
+                .map(providerLabel);
+
+              if (hasPassword) {
+                // Account supports password → almost certainly wrong password
+                setPasswordError('Incorrect password.');
+                setFormError('Email or password is incorrect.');
+              } else if (otherProviders.length) {
+                // Registered via social only
+                setFormError(
+                  `This email is registered with ${otherProviders.join(
+                    ' / '
+                  )}. Please use that to log in.`
+                );
+              } else {
+                // Shouldn't happen often, but stay generic
+                setFormError('Email or password is incorrect.');
+              }
             } else {
-              // Email exists, so password is likely incorrect
-              setPasswordError('Incorrect password.');
+              // Empty methods (can be typos/gmail dot variants/etc.) → generic
+              setFormError('Email or password is incorrect.');
             }
           } catch {
-            // Fallback generic error if method check fails
-            setFormError('Login failed. Please try again.');
+            // If the check fails for any reason, fall back to generic
+            setFormError('Email or password is incorrect.');
           }
           break;
         }
-
-        case 'auth/user-not-found':
-          setEmailError('No account found for this email.');
-          break;
 
         case 'auth/user-disabled':
           setFormError('This account has been disabled.');
@@ -184,16 +227,20 @@ export default function LoginPage() {
     }
   }
 
+  // ----- Render
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center px-4 md:px-8"
+      className="min-h-[100svh] md:min-h-[100vh] w-full flex items-center justify-center px-4 md:px-8 py-8 sm:py-12 md:py-16 lg:py-20"
       style={{
         background: 'linear-gradient(135deg, #E4E5FF, #F3BBCE9D, #FF99A54D)',
+        paddingTop: 'max(env(safe-area-inset-top), 1.5rem)',
+        paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)',
       }}
     >
       <div className="flex flex-col md:flex-row w-full max-w-[1600px] justify-between items-center">
         {/* Left - Login form card */}
         <div className="w-full md:w-6/12 bg-white rounded-3xl shadow-2xl flex flex-col justify-center p-6 md:p-12 mb-10 md:mb-0 h-auto md:h-[790px]">
+          {/* Logo + Title */}
           <div className="mb-6 text-center">
             <img
               src={logocomplet}
@@ -235,6 +282,7 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* Divider */}
           <div className="flex items-center gap-4 mb-6">
             <hr className="flex-1 border-transparent" />
             <span className="text-[#FF99A5] text-xl md:text-[32px] font-semibold">
@@ -268,6 +316,8 @@ export default function LoginPage() {
                 aria-invalid={!!emailError}
                 aria-describedby="login-email-error"
                 disabled={loading}
+                inputMode="email"
+                autoComplete="username"
               />
               {emailError && (
                 <p
@@ -304,6 +354,7 @@ export default function LoginPage() {
                 aria-invalid={!!passwordError}
                 aria-describedby="login-password-error"
                 disabled={loading}
+                autoComplete="current-password"
               />
               {/* Toggle password visibility */}
               <button
@@ -315,6 +366,7 @@ export default function LoginPage() {
               >
                 {showPw ? <FaEyeSlash /> : <FaEye />}
               </button>
+
               {capsOn && (
                 <p className="mt-1 text-xs text-amber-600">Caps Lock is on.</p>
               )}
