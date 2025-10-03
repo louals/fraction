@@ -1,34 +1,58 @@
+// src/components/ProfilButton.tsx
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/firebase';
 
+/** Detect if the device supports hover (desktop/laptop/trackpad) */
+function useSupportsHover() {
+  const [supportsHover, setSupportsHover] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(hover: hover)');
+
+    const update = () => setSupportsHover(!!mq.matches);
+    update();
+
+    // Add listener with fallback for older Safari
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', update);
+      return () => mq.removeEventListener('change', update);
+    } else {
+      // @ts-ignore deprecated but safe fallback
+      mq.addListener(update);
+      // @ts-ignore
+      return () => mq.removeListener(update);
+    }
+  }, []);
+
+  return supportsHover;
+}
+
 export default function ProfilButton() {
-  // State for controlling dropdown visibility
   const [open, setOpen] = useState(false);
-
-  // Ref to detect clicks outside the dropdown
   const popRef = useRef<HTMLDivElement>(null);
+  const supportsHover = useSupportsHover();
 
-  // Handle closing dropdown on outside click or Escape key
+  // Close on outside click & Escape
   useEffect(() => {
     const onDocClick = (e: MouseEvent) => {
       if (!popRef.current) return;
       if (!popRef.current.contains(e.target as Node)) setOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
 
     document.addEventListener('mousedown', onDocClick);
     document.addEventListener('keydown', onKey);
-
-    // Cleanup listeners on unmount
     return () => {
       document.removeEventListener('mousedown', onDocClick);
       document.removeEventListener('keydown', onKey);
     };
   }, []);
 
-  // Handle user logout and close the dropdown
   async function handleLogout() {
     try {
       await signOut(auth);
@@ -37,14 +61,33 @@ export default function ProfilButton() {
     }
   }
 
+  const btnId = 'profile-menu-button';
+  const menuId = 'profile-menu';
+
   return (
-    <div ref={popRef} className="relative">
-      {/* Profile button with avatar and dropdown arrow */}
+    <div
+      ref={popRef}
+      className="relative"
+      // Open/close by hover for pointer devices
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      // Open with keyboard focus, close when focus leaves the whole popover
+      onFocus={() => setOpen(true)}
+      onBlur={(e) => {
+        if (!popRef.current?.contains(e.relatedTarget as Node)) setOpen(false);
+      }}
+    >
+      {/* Trigger */}
       <button
+        id={btnId}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        aria-controls={open ? menuId : undefined}
+        // On touch devices (no hover), toggle on click
+        onClick={() => {
+          if (!supportsHover) setOpen((v) => !v);
+        }}
         className="inline-flex items-center gap-2 rounded-full p-1.5
                    focus-visible:outline-none focus-visible:ring-2
                    focus-visible:ring-[var(--color-fraction-violet-500,#7c3aed)]/50"
@@ -70,14 +113,15 @@ export default function ProfilButton() {
         </svg>
       </button>
 
-      {/* Dropdown menu */}
+      {/* Dropdown */}
       {open && (
         <div
+          id={menuId}
           role="menu"
+          aria-labelledby={btnId}
           className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-200 bg-white
                      p-1.5 shadow-lg ring-1 ring-black/5 z-50"
         >
-          {/* Link to profile/dashboard */}
           <Link
             to="/dashboard"
             role="menuitem"
@@ -87,7 +131,6 @@ export default function ProfilButton() {
             Profile
           </Link>
 
-          {/* Log out button */}
           <button
             type="button"
             role="menuitem"
