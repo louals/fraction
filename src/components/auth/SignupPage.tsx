@@ -10,7 +10,10 @@ import {
   FaEyeSlash,
 } from 'react-icons/fa';
 import { auth } from '../../firebase/firebase.ts';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail, // ← used to explain "email already in use" nicely
+} from 'firebase/auth';
 import { ensureUserDoc } from './ensureUserDoc';
 import {
   signInWithGoogle,
@@ -23,18 +26,31 @@ import logocomplet from '../../assets/images/logocomplet.png';
 import { useNavigate } from 'react-router-dom';
 import Loader from '../loading/logo_loader.tsx';
 
+/** Basic email pattern for UI-level validation (Firebase also validates server-side) */
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Sanitize e-mail: remove invisible unicode (RTL/zero-width), whitespace, normalize & lowercase */
+const sanitizeEmail = (raw: string) =>
+  raw
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\u2060\uFEFF\u061C\u200E\u200F]/g, '')
+    .replace(/\s+/g, '')
+    .toLowerCase();
+
 /**
  * SignupPage
  * - Email/password sign up with live password requirements
  * - Social sign up (Google, Facebook, Apple)
- * - Creates/updates a Firestore user document after successful registration
- * - Password visibility toggle (eye icon) that stays aligned
- * - Accessibility-friendly error hints
+ * - Creates Firestore user doc; writes `status` only on first creation
+ * - Password visibility toggle
  */
 const SignupPage = () => {
   // --- Form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // NEW: account status (French options)
+  const [status, setStatus] = useState<'acheteur' | 'vendeur'>('acheteur');
 
   // --- Checkboxes (consents/preferences)
   const [termsChecked, setTermsChecked] = useState(false);
@@ -49,7 +65,7 @@ const SignupPage = () => {
 
   const navigate = useNavigate();
 
-  // --- Password live checks (computed from current value)
+  // --- Password live checks (computed)
   const checks = useMemo(() => {
     return {
       minLen: password.length >= 8,
@@ -60,13 +76,11 @@ const SignupPage = () => {
     };
   }, [password]);
 
-  // Whether all password requirements pass
   const allPasswordValid = useMemo(
     () => Object.values(checks).every(Boolean),
     [checks]
   );
 
-  // Dynamic input border styling based on password validity/focus
   const inputBorderForPassword = useMemo(() => {
     if (password.length === 0 && !pwFocused) {
       return 'border-gray-300 focus:ring-[#a052e0]';
@@ -76,11 +90,17 @@ const SignupPage = () => {
       : 'border-fraction-light-600 focus:ring-[#a052e0]';
   }, [password.length, allPasswordValid, pwFocused]);
 
-  // --- Social handlers
+  // --- Social handlers: ensure user doc so `status` is captured on first creation
   async function onGoogle() {
     try {
       setLoading(true);
       await signInWithGoogle(auth, newsChecked);
+      if (auth.currentUser) {
+        await ensureUserDoc(auth.currentUser, {
+          marketingOptIn: newsChecked,
+          status,
+        });
+      }
       navigate('/');
     } catch (e: any) {
       setFormError(e?.message ?? 'Google sign-in failed');
@@ -92,6 +112,12 @@ const SignupPage = () => {
     try {
       setLoading(true);
       await signInWithFacebook(auth, newsChecked);
+      if (auth.currentUser) {
+        await ensureUserDoc(auth.currentUser, {
+          marketingOptIn: newsChecked,
+          status,
+        });
+      }
       navigate('/');
     } catch (e: any) {
       setFormError(e?.message ?? 'Facebook sign-in failed');
@@ -103,6 +129,12 @@ const SignupPage = () => {
     try {
       setLoading(true);
       await signInWithApple(auth, newsChecked);
+      if (auth.currentUser) {
+        await ensureUserDoc(auth.currentUser, {
+          marketingOptIn: newsChecked,
+          status,
+        });
+      }
       navigate('/');
     } catch (e: any) {
       setFormError(e?.message ?? 'Apple sign-in failed');
@@ -122,23 +154,30 @@ const SignupPage = () => {
       return;
     }
 
-    // Enforce password requirements
+    // Password requirements
     if (!allPasswordValid) {
       setFormError('Please meet all password requirements.');
       return;
     }
 
+    // Sanitize + basic email validation
+    const cleanedEmail = sanitizeEmail(email);
+    if (!cleanedEmail || !emailRegex.test(cleanedEmail)) {
+      setFormError('Enter a valid email address.');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Create Firebase user with email/password
+      // Create Firebase user
       const { user } = await createUserWithEmailAndPassword(
         auth,
-        email.trim(),
+        cleanedEmail,
         password
       );
 
-      // Create/merge Firestore user profile
-      await ensureUserDoc(user, { marketingOptIn: newsChecked });
+      // Create/merge Firestore user profile (includes status + marketing flag)
+      await ensureUserDoc(user, { marketingOptIn: newsChecked, status });
 
       // Redirect to Login after successful signup
       navigate('/login');
@@ -149,28 +188,86 @@ const SignupPage = () => {
       setTermsChecked(false);
       setRiskChecked(false);
       setNewsChecked(false);
+      setStatus('acheteur');
     } catch (error: any) {
-      // Map Firebase error codes to user-friendly messages
       const code = error?.code as string | undefined;
+      // Make provider names friendlier
+      const providerLabel = (pid: string) =>
+        pid === 'google.com'
+          ? 'Google'
+          : pid === 'facebook.com'
+          ? 'Facebook'
+          : pid === 'apple.com'
+          ? 'Apple'
+          : pid === 'password'
+          ? 'Email/Password'
+          : pid ?? 'provider';
+
       switch (code) {
-        case 'auth/email-already-in-use':
-          setFormError(
-            'This email is already registered. Try logging in or reset your password.'
-          );
+        case 'auth/email-already-in-use': {
+          // Email belongs to an existing account → find how to guide the user
+          try {
+            const methods = await fetchSignInMethodsForEmail(
+              auth,
+              cleanedEmail
+            );
+            if (methods && methods.length > 0) {
+              const hasPassword = methods.includes('password');
+              const otherProviders = methods
+                .filter((m) => m !== 'password')
+                .map(providerLabel);
+
+              if (hasPassword) {
+                // Account already has password: tell user to Log in instead
+                setFormError(
+                  'This email is already registered. Please log in instead.'
+                );
+              } else if (otherProviders.length) {
+                // Registered via social only
+                setFormError(
+                  `This email is already registered with ${otherProviders.join(
+                    ' / '
+                  )}. Please use that to log in.`
+                );
+              } else {
+                setFormError(
+                  'This email is already registered. Try logging in or reset your password.'
+                );
+              }
+            } else {
+              // Fallback generic
+              setFormError(
+                'This email is already registered. Try logging in or reset your password.'
+              );
+            }
+          } catch {
+            setFormError(
+              'This email is already registered. Try logging in or reset your password.'
+            );
+          }
           break;
+        }
+
         case 'auth/invalid-email':
           setFormError('Enter a valid email address.');
           break;
+
         case 'auth/weak-password':
           setFormError(
             'Password is too weak. Please meet the requirements below.'
           );
           break;
+
         case 'auth/network-request-failed':
           setFormError(
             'Network error. Please check your connection and try again.'
           );
           break;
+
+        case 'auth/too-many-requests':
+          setFormError('Too many attempts. Please try again later.');
+          break;
+
         default:
           setFormError(
             error?.message ?? 'Something went wrong. Please try again.'
@@ -184,14 +281,19 @@ const SignupPage = () => {
   // --- Render
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center px-4 md:px-8"
+      className="min-h-[100svh] md:min-h-[100vh] w-full flex items-center justify-center px-4 md:px-8 py-8 sm:py-12 md:py-16 lg:py-20"
       style={{
         background: 'linear-gradient(135deg, #E4E5FF, #F3BBCE9D, #FF99A54D)',
+        paddingTop: 'max(env(safe-area-inset-top), 1.5rem)',
+        paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)',
       }}
     >
       <div className="flex flex-col md:flex-row w-full max-w-[1600px] justify-between items-center">
         {/* Left - Form Card */}
-        <div className="w-full md:w-6/12 bg-white rounded-3xl shadow-2xl flex flex-col justify-center p-6 md:p-12 mb-10 md:mb-0 h-auto md:h-[790px]">
+        <div
+          className="w-full md:w-6/12 bg-white rounded-3xl shadow-2xl flex flex-col justify-center p-6 md:p-12 mb-10 md:mb-0
++                 h-auto md:min-h-[790px] md:max-h-[calc(100svh-8rem)] md:overflow-y-auto pb-6"
+        >
           {/* Logo + Title */}
           <div className="mb-6 text-center">
             <img
@@ -257,6 +359,8 @@ const SignupPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a052e0] placeholder-gray-400"
               required
+              inputMode="email"
+              autoComplete="email"
             />
 
             {/* Password input + eye icon (kept aligned) + live requirements (as sibling) */}
@@ -274,6 +378,7 @@ const SignupPage = () => {
                   minLength={8}
                   required
                   aria-describedby="pw-reqs"
+                  autoComplete="new-password"
                 />
 
                 {/* Eye icon: prevent input from losing focus on mouse down to avoid flicker */}
@@ -289,7 +394,7 @@ const SignupPage = () => {
                 </button>
               </div>
 
-              {/* Requirements list is a sibling (not inside the relative box) */}
+              {/* Requirements list */}
               {(pwFocused || password.length > 0) && (
                 <ul
                   id="pw-reqs"
@@ -351,6 +456,38 @@ const SignupPage = () => {
               )}
             </div>
 
+            {/* NEW — Account status (French) */}
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium text-gray-700">
+                Statut du compte
+              </legend>
+              <div className="flex items-center gap-6">
+                <label className="inline-flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="acheteur"
+                    checked={status === 'acheteur'}
+                    onChange={() => setStatus('acheteur')}
+                    className="w-4 h-4 accent-[#3A3178]"
+                  />
+                  <span>Acheteur</span>
+                </label>
+
+                <label className="inline-flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="status"
+                    value="vendeur"
+                    checked={status === 'vendeur'}
+                    onChange={() => setStatus('vendeur')}
+                    className="w-4 h-4 accent-[#3A3178]"
+                  />
+                  <span>Vendeur</span>
+                </label>
+              </div>
+            </fieldset>
+
             {/* Consents / Preferences */}
             <div className="flex flex-col gap-2 mt-2">
               <label className="flex items-center gap-2 text-gray-700 text-sm cursor-pointer">
@@ -388,7 +525,9 @@ const SignupPage = () => {
 
             {/* Form-level error */}
             {formError && (
-              <p className="text-xs text-fraction-light-600">{formError}</p>
+              <p className="text-xs text-red-600" aria-live="polite">
+                {formError}
+              </p>
             )}
 
             {/* Submit button */}

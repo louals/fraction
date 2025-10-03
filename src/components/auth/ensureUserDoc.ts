@@ -1,39 +1,47 @@
+// src/components/auth/ensureUserDoc.ts
 import { db } from '../../firebase/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
 
-// Type definition for optional options when creating/updating user doc
-type EnsureOpts = { marketingOptIn?: boolean };
+export type UserStatus = 'acheteur' | 'vendeur';
 
-// This function ensures that a user document exists in Firestore
-// If the document already exists, it will be merged with new values
-// If it doesn't exist, it will be created with the provided defaults
+type EnsureOpts = {
+  marketingOptIn?: boolean;
+  status?: UserStatus; // Optional user status
+};
+
+/**
+ * Create or update user document in Firestore
+ * - First time: sets documents: [], status, createdAt, updatedAt
+ * - Later updates: only safe fields + updatedAt (does not overwrite documents/status/createdAt)
+ */
 export async function ensureUserDoc(user: User, opts?: EnsureOpts) {
-  await setDoc(
-    // Reference to the "users" collection with the user's UID as the document ID
-    doc(db, 'users', user.uid),
-    {
-      // Basic user fields
-      uid: user.uid,
-      email: user.email ?? '',
-      displayName: user.displayName ?? '',
-      photoURL: user.photoURL ?? '',
+  const ref = doc(db, 'users', user.uid);
+  const snap = await getDoc(ref);
 
-      // Default role assigned to every new user
-      role: 'user',
+  // Fields that can always be updated
+  const baseUpdatable = {
+    uid: user.uid,
+    email: user.email ?? '',
+    displayName: user.displayName ?? '',
+    photoURL: user.photoURL ?? '',
+    role: 'user',
+    ...(typeof opts?.marketingOptIn !== 'undefined'
+      ? { marketingOptIn: !!opts.marketingOptIn }
+      : {}),
+    updatedAt: serverTimestamp(),
+  };
 
-      // Whether the user opted in for marketing (default: false if not provided)
-      marketingOptIn: !!opts?.marketingOptIn,
-
-      // Creation timestamp — meaningful only on the very first creation
+  if (!snap.exists()) {
+    // Create new user document on first login
+    await setDoc(ref, {
+      ...baseUpdatable,
+      documents: [],
+      status: opts?.status ?? 'acheteur', // Default: acheteur
       createdAt: serverTimestamp(),
-
-      // Updated timestamp — refreshed each time this function is called
-      updatedAt: serverTimestamp(),
-    },
-    {
-      // Merge ensures we don't overwrite existing fields unintentionally
-      merge: true,
-    }
-  );
+    });
+  } else {
+    // Merge update without overwriting important fields
+    await setDoc(ref, baseUpdatable, { merge: true });
+  }
 }
