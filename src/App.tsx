@@ -26,7 +26,7 @@ function App() {
           <Routes>
             {/* 🔒 Route protégée */}
             <Route
-              path='/dashboard'
+              path='/profil'
               element={
                 <RequireAuth>
                   <SpaciousLayout>
