@@ -1,34 +1,36 @@
 import * as React from 'react';
-import Field from '../../../components/Field';
-import { uploadFiles, patchProperty } from '../../../lib/firebase-io';
+import FileDropzone from '../../../components/FileDropzone';
 
 type Props = {
-  propId: string;
+  /** Fichiers PDF sélectionnés (contrôlé par le wizard) */
+  value: File[];
+  /** Mise à jour de la liste (contrôlé par le wizard) */
+  onChange: (files: File[]) => void;
   onPrev: () => void;
-  onFinish: () => void;
+  /** Soumission finale (le wizard fait les uploads + createProperty) */
+  onSubmit: () => Promise<void>;
+  /** État d’envoi global (wizard) */
+  submitting?: boolean;
+  /** Progression globale (0..100) — optionnelle */
+  progress?: number;
+  /** Message d’erreur global — optionnel */
+  error?: string | null;
 };
 
-export default function Step3Legal({ propId, onPrev, onFinish }: Props) {
-  const [files, setFiles] = React.useState<File[]>([]);
-  const [progress, setProgress] = React.useState<number>(0);
-  const [agree, setAgree] = React.useState(false);
+export default function Step3Legal({
+  value,
+  onChange,
+  onPrev,
+  onSubmit,
+  submitting = false,
+  progress = 0,
+  error = null,
+}: Props) {
+  const [agree, setAgree] = React.useState<boolean>(false);
 
-  async function handleSubmit() {
-    if (!agree) return;
-    if (files.length) {
-      const results = await uploadFiles(
-        files,
-        `properties/${propId}/legal`,
-        (p) => setProgress(p)
-      );
-      await patchProperty(propId, {
-        legalDocPaths: results.map((r) => r.path),
-        status: 'submitted',
-      });
-    } else {
-      await patchProperty(propId, { status: 'submitted' });
-    }
-    onFinish();
+  async function handleClick() {
+    if (!agree || submitting) return;
+    await onSubmit();
   }
 
   const btnGhost =
@@ -46,21 +48,15 @@ export default function Step3Legal({ propId, onPrev, onFinish }: Props) {
 
   return (
     <div className='grid gap-6'>
-      <Field
+      <FileDropzone
         label='Documents légaux (PDF)'
-        hint={
-          progress
-            ? `Upload: ${progress}%`
-            : 'Ex: titre de propriété, déclaration vendeur…'
-        }
-      >
-        <input
-          type='file'
-          accept='application/pdf'
-          multiple
-          onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
-        />
-      </Field>
+        hint='Ex: titre de propriété, déclaration du vendeur… (PDF uniquement, ≤ 20MB)'
+        accept='application/pdf,.pdf'
+        maxSizeMB={20}
+        multiple
+        value={value}
+        onChange={onChange}
+      />
 
       <label className='flex items-center gap-3'>
         <input
@@ -75,16 +71,34 @@ export default function Step3Legal({ propId, onPrev, onFinish }: Props) {
         </span>
       </label>
 
+      {/* Barre de progression globale (affichée pendant l'envoi) */}
+      {submitting && (
+        <div className='mt-1'>
+          <div className='h-2 w-full rounded bg-zinc-100'>
+            <div
+              className='h-2 rounded bg-[var(--color-fraction-violet-500)] transition-[width] motion-safe:duration-200'
+              style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+            />
+          </div>
+          <p className='mt-1 text-xs text-zinc-500'>
+            Téléversement… {Math.round(progress)}%
+          </p>
+        </div>
+      )}
+
+      {/* Erreur globale éventuelle venant du wizard */}
+      {error && <p className='text-red-600'>{error}</p>}
+
       <div className='flex justify-between'>
-        <button className={btnGhost} onClick={onPrev}>
+        <button className={btnGhost} onClick={onPrev} disabled={submitting}>
           Retour
         </button>
         <button
           className={`${btnPrimary} disabled:opacity-50`}
-          disabled={!agree}
-          onClick={handleSubmit}
+          disabled={!agree || submitting}
+          onClick={handleClick}
         >
-          Soumettre
+          {submitting ? 'Envoi…' : 'Soumettre'}
         </button>
       </div>
     </div>

@@ -1,28 +1,16 @@
 import * as React from 'react';
-import Field from '../../../components/Field';
-import { uploadFiles, patchProperty } from '../../../lib/firebase-io';
+import FileDropzone from '../../../components/FileDropzone';
 
 type Props = {
-  propId: string;
+  /** Fichiers sélectionnés (contrôlé par le wizard) */
+  value: File[];
+  /** Mise à jour de la liste (contrôlé par le wizard) */
+  onChange: (files: File[]) => void;
   onPrev: () => void;
   onNext: () => void;
 };
 
-export default function Step2Plans({ propId, onPrev, onNext }: Props) {
-  const [files, setFiles] = React.useState<File[]>([]);
-  const [progress, setProgress] = React.useState<number>(0);
-
-  async function handleSave() {
-    if (!files.length) return onNext();
-    const results = await uploadFiles(
-      files,
-      `properties/${propId}/plans`,
-      (p) => setProgress(p)
-    );
-    await patchProperty(propId, { planPaths: results.map((r) => r.path) });
-    onNext();
-  }
-
+export default function Step2Plans({ value, onChange, onPrev, onNext }: Props) {
   const btnGhost =
     'inline-flex items-center justify-center rounded-3xl px-6 py-2 border-2 bg-white select-none transition ease-out ' +
     'text-[var(--color-fraction-violet-500)] border-[var(--color-fraction-violet-500)] ' +
@@ -38,23 +26,21 @@ export default function Step2Plans({ propId, onPrev, onNext }: Props) {
 
   return (
     <div className='grid gap-6'>
-      <Field
+      <FileDropzone
         label='Plans (PDF ou images)'
-        hint={progress ? `Upload: ${progress}%` : 'PDF/PNG/JPG'}
-      >
-        <input
-          type='file'
-          accept='application/pdf,image/*'
-          multiple
-          onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
-        />
-      </Field>
+        hint='PDF/PNG/JPG/WEBP jusqu’à 20MB — tu peux glisser-déposer plusieurs fichiers'
+        accept='application/pdf,image/*,.png,.jpg,.jpeg,.webp'
+        maxSizeMB={20}
+        multiple
+        value={value}
+        onChange={onChange}
+      />
 
       <div className='flex justify-between'>
         <button className={btnGhost} onClick={onPrev}>
           Retour
         </button>
-        <button className={btnPrimary} onClick={handleSave}>
+        <button className={btnPrimary} onClick={onNext}>
           Continuer
         </button>
       </div>

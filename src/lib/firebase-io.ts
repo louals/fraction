@@ -1,3 +1,4 @@
+// src/lib/firebase-io.ts
 import { db, storage } from '../firebase/firebase';
 import {
   getDownloadURL,
@@ -6,11 +7,9 @@ import {
   type UploadTask,
 } from 'firebase/storage';
 import {
-  addDoc,
   collection,
   doc,
   getDoc,
-  updateDoc,
   serverTimestamp,
   setDoc,
 } from 'firebase/firestore';
@@ -18,30 +17,35 @@ import type { PropertyDoc } from '../types/realestate';
 
 export type UploadResult = { path: string; downloadURL: string };
 
-// ⚠️ helper: supprime toutes les clés à valeur undefined (indispensable avant Firestore)
+/** Retire toutes les clés = undefined avant d'envoyer à Firestore */
 function omitUndefined<T extends Record<string, unknown>>(obj: T) {
   return Object.fromEntries(
     Object.entries(obj).filter(([, v]) => v !== undefined)
   ) as Partial<T>;
 }
 
+/**
+ * Upload d'une liste de fichiers vers Firebase Storage.
+ * - basePath ex: `users/${uid}/properties/${propId}/photos`
+ * - onProgress: callback 0..100
+ */
 export async function uploadFiles(
   files: File[],
   basePath: string,
   onProgress?: (percent: number) => void
 ): Promise<UploadResult[]> {
   const results: UploadResult[] = [];
+
   for (const file of files) {
-    const fileRef = ref(
-      storage,
-      `${basePath}/${
-        crypto.randomUUID?.() ??
-        `${Date.now()}_${Math.random().toString(36).slice(2)}`
-      }_${file.name}`
-    );
+    const unique =
+      (crypto as any)?.randomUUID?.() ??
+      `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const fileRef = ref(storage, `${basePath}/${unique}_${file.name}`);
+
     const task: UploadTask = uploadBytesResumable(fileRef, file, {
       contentType: file.type,
     });
+
     await new Promise<void>((resolve, reject) => {
       task.on(
         'state_changed',
@@ -51,71 +55,58 @@ export async function uploadFiles(
         () => resolve()
       );
     });
+
     const downloadURL = await getDownloadURL(task.snapshot.ref);
     results.push({ path: task.snapshot.ref.fullPath, downloadURL });
   }
+
   return results;
 }
 
-export async function createDraftProperty(ownerId: string): Promise<string> {
-  const col = collection(db, 'properties');
-
-  // ⬇️ Note: pas de coverPhotoPath: undefined ici
-  const payload: PropertyDoc = {
-    ownerId,
-    status: 'draft',
-    createdAt: null,
-    updatedAt: null,
-
-    title: '',
-    description: '',
-    priceCAD: null,
-    addressLine1: '',
-    city: '',
-    province: 'QC',
-    postalCode: '',
-    bedrooms: null,
-    bathrooms: null,
-    sizeSqft: null,
-
-    photoPaths: [],
-    // coverPhotoPath: (omis)  ← surtout pas undefined
-    planPaths: [],
-    legalDocPaths: [],
-  };
-
-  const refDoc = await addDoc(col, payload as any);
-
-  // Best-effort: ne bloque jamais le retour d’ID
-  updateDoc(refDoc, {
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  } as any).catch((e) =>
-    console.warn('Timestamp update failed (non-blocking):', e)
-  );
-
-  return refDoc.id;
+/**
+ * Réserve un id local pour un document `properties/{id}`.
+ *  Ne fait AUCUNE écriture réseau : c'est juste un id.
+ */
+export function reservePropertyId(): string {
+  return doc(collection(db, 'properties')).id;
 }
 
-export async function patchProperty(id: string, partial: Partial<PropertyDoc>) {
-  const refDoc = doc(db, 'properties', id);
-  // ⬇️ TRÈS IMPORTANT : enlever toutes les clés undefined avant update
+/**
+ * Création FINALE de la propriété (écriture unique).
+ * - Ajoute createdAt/updatedAt = serverTimestamp()
+ * - Filtre les `undefined`
+ */
+export async function createProperty(
+  id: string,
+  payload: PropertyDoc
+): Promise<void> {
+  const clean = omitUndefined({
+    ...payload,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  } as any);
+
+  await setDoc(doc(db, 'properties', id), clean as any, { merge: false });
+}
+
+/**
+ * (Optionnel) Mise à jour partielle après création.
+ * - Utilise setDoc(..., {merge:true}) pour éviter les erreurs de champs manquants
+ * - Ajoute updatedAt = serverTimestamp()
+ */
+export async function updateProperty(
+  id: string,
+  partial: Partial<PropertyDoc>
+): Promise<void> {
   const clean = omitUndefined({
     ...partial,
     updatedAt: serverTimestamp(),
   } as any);
-  await updateDoc(refDoc, clean as any);
+
+  await setDoc(doc(db, 'properties', id), clean as any, { merge: true });
 }
 
-export async function setProperty(id: string, payload: PropertyDoc) {
-  const refDoc = doc(db, 'properties', id);
-  const clean = omitUndefined({
-    ...payload,
-    updatedAt: serverTimestamp(),
-  } as any);
-  await setDoc(refDoc, clean as any, { merge: true });
-}
-
+/** Lecture typée d'une propriété */
 export async function getProperty(id: string): Promise<PropertyDoc | null> {
   const refDoc = doc(db, 'properties', id);
   const snap = await getDoc(refDoc);

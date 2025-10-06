@@ -5,79 +5,68 @@ import {
   CA_POSTAL_REGEX,
   type ProvinceCA,
 } from '../../../types/realestate';
-import { uploadFiles, patchProperty } from '../../../lib/firebase-io';
+
+import FileDropzone from '../../FileDropzone';
+
+export type Step1Form = {
+  title: string;
+  description: string;
+  priceCAD: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  province: ProvinceCA;
+  postalCode: string;
+  bedrooms: string;
+  bathrooms: string;
+  sizeSqft: string;
+};
 
 type Props = {
-  propId: string;
+  value: Step1Form;
+  onChange: (next: Step1Form) => void;
+  photos: File[];
+  onPhotosChange: (files: File[]) => void;
   onNext: () => void;
 };
 
-export default function Step1Basic({ propId, onNext }: Props) {
-  const [form, setForm] = React.useState({
-    title: '',
-    description: '',
-    priceCAD: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    province: 'QC' as ProvinceCA,
-    postalCode: '',
-    bedrooms: '',
-    bathrooms: '',
-    sizeSqft: '',
-  });
-  const [photos, setPhotos] = React.useState<File[]>([]);
-  const [progress, setProgress] = React.useState<number>(0);
+export default function Step1Basic({
+  value,
+  onChange,
+  photos,
+  onPhotosChange,
+  onNext,
+}: Props) {
   const [error, setError] = React.useState<string>('');
 
-  function update<K extends keyof typeof form>(key: K, val: (typeof form)[K]) {
-    setForm((prev) => ({ ...prev, [key]: val }));
+  function update<K extends keyof Step1Form>(key: K, val: Step1Form[K]) {
+    onChange({ ...value, [key]: val });
   }
 
-  async function handleSave() {
-    setError('');
-
-    // Validations Canada
-    if (!form.title.trim()) return setError('Titre requis');
+  function validateMinimal(): string | null {
+    if (!value.title.trim()) return 'Titre requis';
     if (
-      !form.addressLine1.trim() ||
-      !form.city.trim() ||
-      !form.postalCode.trim()
+      !value.addressLine1.trim() ||
+      !value.city.trim() ||
+      !value.postalCode.trim()
     ) {
-      return setError('Adresse incomplète');
+      return 'Adresse incomplète';
     }
-    if (!CA_POSTAL_REGEX.test(form.postalCode)) {
-      return setError('Code postal canadien invalide (ex: H2X 1Y4)');
+    if (!CA_POSTAL_REGEX.test(value.postalCode)) {
+      return 'Code postal canadien invalide (ex: H2X 1Y4)';
     }
-    const price = Number(form.priceCAD);
-    if (Number.isNaN(price) || price <= 0) return setError('Prix invalide');
+    const price = Number(value.priceCAD);
+    if (Number.isNaN(price) || price <= 0) return 'Prix invalide';
+    return null;
+  }
 
-    // Upload des photos si besoin
-    let uploadedPaths: string[] = [];
-    if (photos.length) {
-      const results = await uploadFiles(
-        photos,
-        `properties/${propId}/photos`,
-        (p) => setProgress(p)
-      );
-      uploadedPaths = results.map((r) => r.path);
+  function handleNext() {
+    const v = validateMinimal();
+    if (v) {
+      setError(v);
+      return;
     }
-
-    await patchProperty(propId, {
-      title: form.title.trim(),
-      description: form.description.trim(),
-      priceCAD: price,
-      addressLine1: form.addressLine1.trim(),
-      addressLine2: form.addressLine2.trim() || undefined,
-      city: form.city.trim(),
-      province: form.province,
-      postalCode: form.postalCode.toUpperCase(),
-      bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
-      bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-      sizeSqft: form.sizeSqft ? Number(form.sizeSqft) : null,
-      photoPaths: uploadedPaths.length ? uploadedPaths : undefined,
-    });
-
+    setError('');
     onNext();
   }
 
@@ -90,43 +79,48 @@ export default function Step1Basic({ propId, onNext }: Props) {
         <Field label='Titre' required>
           <input
             className={inputBase}
-            value={form.title}
+            value={value.title}
             onChange={(e) => update('title', e.target.value)}
           />
         </Field>
+
         <Field label='Prix (CAD)' required>
           <input
             className={inputBase}
             inputMode='numeric'
-            value={form.priceCAD}
+            value={value.priceCAD}
             onChange={(e) => update('priceCAD', e.target.value)}
           />
         </Field>
+
         <Field label='Adresse (ligne 1)' required>
           <input
             className={inputBase}
-            value={form.addressLine1}
+            value={value.addressLine1}
             onChange={(e) => update('addressLine1', e.target.value)}
           />
         </Field>
+
         <Field label='Adresse (ligne 2)'>
           <input
             className={inputBase}
-            value={form.addressLine2}
+            value={value.addressLine2}
             onChange={(e) => update('addressLine2', e.target.value)}
           />
         </Field>
+
         <Field label='Ville' required>
           <input
             className={inputBase}
-            value={form.city}
+            value={value.city}
             onChange={(e) => update('city', e.target.value)}
           />
         </Field>
+
         <Field label='Province' required>
           <select
             className={inputBase}
-            value={form.province}
+            value={value.province}
             onChange={(e) => update('province', e.target.value as ProvinceCA)}
           >
             {PROVINCES_CA.map((p) => (
@@ -136,35 +130,39 @@ export default function Step1Basic({ propId, onNext }: Props) {
             ))}
           </select>
         </Field>
+
         <Field label='Code postal' required>
           <input
             className={`${inputBase} uppercase`}
-            value={form.postalCode}
+            value={value.postalCode}
             onChange={(e) => update('postalCode', e.target.value)}
             placeholder='H2X 1Y4'
           />
         </Field>
+
         <Field label='Chambres'>
           <input
             className={inputBase}
             inputMode='numeric'
-            value={form.bedrooms}
+            value={value.bedrooms}
             onChange={(e) => update('bedrooms', e.target.value)}
           />
         </Field>
+
         <Field label='Salles de bain'>
           <input
             className={inputBase}
             inputMode='numeric'
-            value={form.bathrooms}
+            value={value.bathrooms}
             onChange={(e) => update('bathrooms', e.target.value)}
           />
         </Field>
+
         <Field label='Superficie (pi²)'>
           <input
             className={inputBase}
             inputMode='numeric'
-            value={form.sizeSqft}
+            value={value.sizeSqft}
             onChange={(e) => update('sizeSqft', e.target.value)}
           />
         </Field>
@@ -173,22 +171,31 @@ export default function Step1Basic({ propId, onNext }: Props) {
       <Field label='Description'>
         <textarea
           className={`${inputBase} min-h-24`}
-          value={form.description}
+          value={value.description}
           onChange={(e) => update('description', e.target.value)}
         />
       </Field>
 
-      <Field
-        label='Photos (images)'
-        hint={progress ? `Upload: ${progress}%` : 'Formats: JPG/PNG/WEBP'}
-      >
+      <FileDropzone
+        label='Photos (WEBP ou PNG)'
+        hint='WEBP/PNG jusqu’à 10MB'
+        accept='image/webp,image/png,.webp,.png'
+        maxSizeMB={10}
+        multiple
+        value={photos}
+        onChange={onPhotosChange}
+      />
+
+      {/* --- Version INPUT classique (si tu n'as pas le composant Dropzone) ---
+      <Field label="Photos (images)" hint="JPG/PNG/WEBP">
         <input
-          type='file'
-          accept='image/*'
+          type="file"
+          accept="image/*"
           multiple
-          onChange={(e) => setPhotos(Array.from(e.target.files ?? []))}
+          onChange={(e) => onPhotosChange(Array.from(e.target.files ?? []))}
         />
       </Field>
+      ---------------------------------------------------------------------- */}
 
       {error && <p className='text-red-600'>{error}</p>}
 
@@ -200,9 +207,9 @@ export default function Step1Basic({ propId, onNext }: Props) {
                      motion-safe:hover:scale-[1.03] hover:-translate-y-0.5 active:scale-95
                      hover:bg-white hover:text-[var(--color-fraction-violet-500)] hover:border-[var(--color-fraction-violet-500)]
                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-fraction-violet-500)]/60'
-          onClick={handleSave}
+          onClick={handleNext}
         >
-          Enregistrer & Continuer
+          Continuer
         </button>
       </div>
     </div>
