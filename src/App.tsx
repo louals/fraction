@@ -1,3 +1,4 @@
+// src/App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
@@ -17,16 +18,17 @@ import AuthProvider from '../src/components/auth/AuthProvider';
 import RequireAuth from '../src/components/auth/RequireAuth';
 import { PublicOnly } from '../src/components/auth/PublicOnly';
 import PropertySell from './pages/property/SellProperty';
+import VerifyEmailPage from './components/auth/VerifyEmailPage';
 
 function App() {
   return (
-    <div className='relative h-screen'>
+    <div className="relative h-screen">
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/* 🔒 Route protégée */}
+            {/* 🔒 Routes protégées */}
             <Route
-              path='/profil'
+              path="/profil"
               element={
                 <RequireAuth>
                   <SpaciousLayout>
@@ -36,7 +38,7 @@ function App() {
               }
             />
             <Route
-              path='/sell'
+              path="/sell"
               element={
                 <RequireAuth>
                   <SpaciousLayout>
@@ -46,9 +48,9 @@ function App() {
               }
             />
 
-            {/* 🚪 Page visible uniquement si NON connecté */}
+            {/*  Pages visibles uniquement si NON connecté */}
             <Route
-              path='/signup'
+              path="/signup"
               element={
                 <PublicOnly>
                   <AuthLayout>
@@ -58,7 +60,7 @@ function App() {
               }
             />
             <Route
-              path='/login'
+              path="/login"
               element={
                 <PublicOnly>
                   <AuthLayout>
@@ -67,9 +69,20 @@ function App() {
                 </PublicOnly>
               }
             />
-            {/*  Page visible en tout temps*/}
+
+            {/* Vérification d’e-mail — accessible à tous (pas sous RequireAuth/PublicOnly) */}
             <Route
-              path='/'
+              path="/verify-email"
+              element={
+                <AuthLayout>
+                  <VerifyEmailPage />
+                </AuthLayout>
+              }
+            />
+
+            {/* 🌐 Pages publiques */}
+            <Route
+              path="/"
               element={
                 <LandingLayout>
                   <Landing />
@@ -77,39 +90,43 @@ function App() {
               }
             />
             <Route
-              path='/invest'
+              path="/invest"
               element={
                 <MainLayout>
                   <Invest />
                 </MainLayout>
               }
             />
-
             <Route
-              path='/oneProductDetails'
+              path="/oneProductDetails"
               element={
                 <MainLayout>
                   <OneProductDetails />
                 </MainLayout>
               }
             />
+
+            {/* 🔑 Password reset flow */}
             <Route
-              path='/404'
+              path="/forgot-password"
+              element={<RequestPasswordResetForm />}
+            />
+            <Route
+              path="/reset-password"
+              element={<ConfirmPasswordResetPage />}
+            />
+
+            {/* ❌ 404 */}
+            <Route
+              path="/404"
               element={
                 <SpaciousLayout>
                   <ErrorPage />
                 </SpaciousLayout>
               }
             />
-
-            <Route
-              path='/forgot-password'
-              element={<RequestPasswordResetForm />}
-            />
-            <Route
-              path='/reset-password'
-              element={<ConfirmPasswordResetPage />}
-            />
+            {/* Optional: catch-all to /404 */}
+            {/* <Route path='*' element={<Navigate to='/404' replace />} /> */}
           </Routes>
         </AuthProvider>
       </BrowserRouter>
