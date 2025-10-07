@@ -1,18 +1,16 @@
+import * as React from 'react';
+
 type Step = { number: 1 | 2 | 3; label: string };
 
 export type StepCirclesProps = {
   current: 1 | 2 | 3;
   steps?: Step[];
+  className?: string;
 };
 
-/**
- * StepCircles
- * - Matches sample style (outlined circles, active/inactive colors, RTL-aware)
- * - Step data (labels and numbers) are passed via props
- * - Responsive: vertical on mobile, horizontal from sm and up
- */
 export default function StepCircles({
   current,
+  className,
   steps = [
     { number: 1, label: 'Infos & Photos' },
     { number: 2, label: 'Plans' },
@@ -20,42 +18,55 @@ export default function StepCircles({
   ],
 }: StepCirclesProps) {
   return (
-    <ol
-      className="items-center w-full space-y-4 sm:flex sm:space-x-8 sm:space-y-0 rtl:space-x-reverse"
-      aria-label="Progression"
-    >
-      {steps.map((s) => {
-        const active = s.number <= current;
-        return (
-          <li
-            key={s.number}
-            className={[
-              'flex items-center space-x-2.5 rtl:space-x-reverse',
-              active
-                ? 'text-[var(--color-fraction-violet-600)] dark:text-[var(--color-fraction-violet-400)]'
-                : 'text-slate-500 dark:text-slate-400',
-            ].join(' ')}
-          >
-            <span
-              className={[
-                'flex items-center justify-center w-8 h-8 rounded-full shrink-0 border',
-                active
-                  ? 'border-[var(--color-fraction-violet-600)] dark:border-[var(--color-fraction-violet-400)]'
-                  : 'border-slate-500 dark:border-slate-400',
-              ].join(' ')}
-              aria-current={s.number === current ? 'step' : undefined}
-            >
-              {s.number}
-            </span>
+    <div className={['w-full', className ?? ''].join(' ')}>
+      <ol className="flex items-center gap-3">
+        {steps.map((s, idx) => {
+          const reached = s.number <= current;
+          const isCurrent = s.number === current;
 
-            <span>
-              <h3 className="font-medium leading-tight">{s.label}</h3>
-              {/* Optional subtitle/description: uncomment to use */}
-              {/* <p className="text-sm opacity-80">Details for this step</p> */}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
+          return (
+            <React.Fragment key={s.number}>
+              <li className="relative flex items-center gap-3">
+                <span
+                  className={[
+                    'grid size-9 place-items-center rounded-full border text-sm font-semibold transition',
+                    reached
+                      ? 'bg-[var(--color-fraction-violet-500)] text-white border-transparent shadow-[0_4px_14px_rgba(123,97,255,.35)]'
+                      : 'bg-white text-zinc-600 border-zinc-300',
+                    isCurrent
+                      ? 'ring-4 ring-[var(--color-fraction-violet-500)]/15'
+                      : '',
+                  ].join(' ')}
+                  aria-current={isCurrent ? 'step' : undefined}
+                >
+                  {s.number}
+                </span>
+                <span
+                  className={[
+                    'hidden sm:block text-sm',
+                    reached ? 'text-zinc-900 font-medium' : 'text-zinc-500',
+                  ].join(' ')}
+                >
+                  {s.label}
+                </span>
+              </li>
+
+              {/* connecteur */}
+              {idx < steps.length - 1 && (
+                <div
+                  aria-hidden
+                  className={[
+                    'h-[2px] flex-1 rounded-full transition-colors',
+                    s.number < current
+                      ? 'bg-[var(--color-fraction-violet-500)]'
+                      : 'bg-zinc-200',
+                  ].join(' ')}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </ol>
+    </div>
   );
 }

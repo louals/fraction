@@ -32,7 +32,6 @@ type BasicForm = {
 };
 
 export default function PropertySellWizard() {
-  // Hooks toujours au top-level (pas d'early-return)
   const [step, setStep] = React.useState<1 | 2 | 3>(1);
   const [submitting, setSubmitting] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -40,7 +39,6 @@ export default function PropertySellWizard() {
   const [authUser, setAuthUser] = React.useState<User | null>(auth.currentUser);
   const nav = useNavigate();
 
-  // ---- état centralisé (mémoire uniquement) ----
   const [basic, setBasic] = React.useState<BasicForm>({
     title: '',
     description: '',
@@ -58,13 +56,11 @@ export default function PropertySellWizard() {
   const [plans, setPlans] = React.useState<File[]>([]);
   const [legal, setLegal] = React.useState<File[]>([]);
 
-  // Auth réactive (évite user null au premier rendu)
   React.useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setAuthUser(u));
     return () => unsub();
   }, []);
 
-  // ---- validation globale (utilisée au submit) ----
   function validateAll(): string | null {
     if (!basic.title.trim()) return 'Titre requis';
     if (
@@ -83,15 +79,12 @@ export default function PropertySellWizard() {
     return null;
   }
 
-  // ---- SUBMIT FINAL : upload fichiers puis création du doc ----
   async function handleSubmitFinal() {
-    // Re-lecture locale pour TS (authUser peut être nul)
     const u = auth.currentUser;
     if (!u) {
       setError('Veuillez vous reconnecter.');
       return;
     }
-
     const v = validateAll();
     if (v) {
       setError(v);
@@ -101,13 +94,9 @@ export default function PropertySellWizard() {
     setSubmitting(true);
 
     try {
-      // 1) id local réservé (pas d’écriture)
       const id = reservePropertyId();
-
-      // 2) chemin Storage lié au user (rules plus strictes)
       const base = `users/${u.uid}/properties/${id}`;
 
-      // 3) uploads (on upload maintenant seulement)
       const photoRes = await uploadFiles(photos, `${base}/photos`, (p) =>
         setProgress(p)
       );
@@ -118,35 +107,28 @@ export default function PropertySellWizard() {
         ? await uploadFiles(legal, `${base}/legal`, (p) => setProgress(p))
         : [];
 
-      // 4) payload final strictement typé (aucun undefined côté Firestore grâce à la couche I/O)
       const payload: PropertyDoc = {
         ownerId: u.uid,
         status: 'submitted',
         createdAt: null,
         updatedAt: null,
-
         title: basic.title.trim(),
         description: basic.description.trim(),
         priceCAD: Number(basic.priceCAD),
         addressLine1: basic.addressLine1.trim(),
-        addressLine2: basic.addressLine2.trim() || undefined, // filtré dans createProperty()
+        addressLine2: basic.addressLine2.trim() || undefined,
         city: basic.city.trim(),
         province: basic.province,
         postalCode: basic.postalCode.toUpperCase(),
         bedrooms: basic.bedrooms ? Number(basic.bedrooms) : null,
         bathrooms: basic.bathrooms ? Number(basic.bathrooms) : null,
         sizeSqft: basic.sizeSqft ? Number(basic.sizeSqft) : null,
-
         photoPaths: photoRes.map((r) => r.path),
         planPaths: planRes.map((r) => r.path),
         legalDocPaths: legalRes.map((r) => r.path),
-        // coverPhotoPath: (omettre si pas choisi)
       };
 
-      // 5) écriture unique (création) en base
       await createProperty(id, payload);
-
-      // 6) redirection / succès
       nav('/');
     } catch (e: unknown) {
       const msg =
@@ -158,48 +140,64 @@ export default function PropertySellWizard() {
   }
 
   return (
-    <section className='mx-auto max-w-[104ch] p-6'>
-      <StepCircles current={step} />
-
-      <div className='mt-6 rounded-3xl border bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,.08)]'>
-        {!authUser ? (
-          <p className='mt-2 text-red-600'>
-            Veuillez vous connecter pour vendre une propriété.
+    <section className='min-h-[80vh] w-full bg-gradient-to-t from-[var(--color-fraction-blue-50)] to-white'>
+      <div className='mx-auto max-w-5xl px-4 py-10 md:py-14'>
+        {/* Header */}
+        <div className='mb-6 text-center'>
+          <h1 className='text-2xl font-semibold text-zinc-900 md:text-3xl'>
+            Vendre une propriété
+          </h1>
+          <p className='mt-1 text-sm text-zinc-500'>
+            Complète les informations en 3 étapes claires.
           </p>
-        ) : (
-          <>
-            {step === 1 && (
-              <Step1Basic
-                value={basic}
-                onChange={setBasic}
-                photos={photos}
-                onPhotosChange={setPhotos}
-                onNext={() => setStep(2)}
-              />
-            )}
+        </div>
 
-            {step === 2 && (
-              <Step2Plans
-                value={plans}
-                onChange={setPlans}
-                onPrev={() => setStep(1)}
-                onNext={() => setStep(3)}
-              />
-            )}
+        {/* Stepper */}
+        <div className='mx-auto mb-6 max-w-4xl'>
+          <StepCircles current={step} />
+        </div>
 
-            {step === 3 && (
-              <Step3Legal
-                value={legal}
-                onChange={setLegal}
-                onPrev={() => setStep(2)}
-                onSubmit={handleSubmitFinal}
-                submitting={submitting}
-                progress={progress}
-                error={error}
-              />
-            )}
-          </>
-        )}
+        {/* Card */}
+        <div className='rounded-3xl border border-violet-100/60 bg-white/90 p-6 shadow-[0_20px_60px_rgba(17,12,46,.08),0_8px_24px_rgba(17,12,46,.04)] md:p-8'>
+          {!authUser ? (
+            <p className='mt-2 text-red-600'>
+              Veuillez vous connecter pour vendre une propriété.
+            </p>
+          ) : (
+            <>
+              {step === 1 && (
+                <Step1Basic
+                  value={basic}
+                  onChange={setBasic}
+                  photos={photos}
+                  onPhotosChange={setPhotos}
+                  onNext={() => setStep(2)}
+                />
+              )}
+
+              {step === 2 && (
+                <Step2Plans
+                  value={plans}
+                  onChange={setPlans}
+                  onPrev={() => setStep(1)}
+                  onNext={() => setStep(3)}
+                />
+              )}
+
+              {step === 3 && (
+                <Step3Legal
+                  value={legal}
+                  onChange={setLegal}
+                  onPrev={() => setStep(2)}
+                  onSubmit={handleSubmitFinal}
+                  submitting={submitting}
+                  progress={progress}
+                  error={error}
+                />
+              )}
+            </>
+          )}
+        </div>
       </div>
     </section>
   );

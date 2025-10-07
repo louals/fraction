@@ -67,7 +67,7 @@ export default function ProfilButton() {
   return (
     <div
       ref={popRef}
-      className="relative"
+      className='relative'
       // Open/close by hover for pointer devices
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
@@ -80,35 +80,35 @@ export default function ProfilButton() {
       {/* Trigger */}
       <button
         id={btnId}
-        type="button"
-        aria-haspopup="menu"
+        type='button'
+        aria-haspopup='menu'
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         // On touch devices (no hover), toggle on click
         onClick={() => {
           if (!supportsHover) setOpen((v) => !v);
         }}
-        className="inline-flex items-center gap-2 rounded-full p-1.5
+        className='inline-flex items-center gap-2 rounded-full p-1.5
                    focus-visible:outline-none focus-visible:ring-2
-                   focus-visible:ring-[var(--color-fraction-violet-500,#7c3aed)]/50"
+                   focus-visible:ring-[var(--color-fraction-violet-500,#7c3aed)]/50'
       >
         <img
-          src="/assets/img/icone-account.svg"
-          alt="Account"
-          className="h-12 w-12"
+          src='/assets/img/icone-account.svg'
+          alt='Account'
+          className='h-12 w-12'
         />
         <svg
           className={`h-8 w-8 text-purple-500 transition ${
             open ? 'rotate-180' : ''
           }`}
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
+          viewBox='0 0 20 20'
+          fill='currentColor'
+          aria-hidden='true'
         >
           <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"
-            clipRule="evenodd"
+            fillRule='evenodd'
+            d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z'
+            clipRule='evenodd'
           />
         </svg>
       </button>
@@ -117,25 +117,25 @@ export default function ProfilButton() {
       {open && (
         <div
           id={menuId}
-          role="menu"
+          role='menu'
           aria-labelledby={btnId}
-          className="absolute right-0  w-48 rounded-xl border border-fraction-gray-200 bg-white
-                     p-1.5 shadow-lg ring-1 ring-black/5 z-50"
+          className='absolute right-0  w-48 rounded-xl border border-fraction-gray-200 bg-white
+                     p-1.5 shadow-lg ring-1 ring-black/5 z-50'
         >
           <Link
-            to="/dashboard"
-            role="menuitem"
+            to='/profil'
+            role='menuitem'
             onClick={() => setOpen(false)}
-            className="block w-full rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+            className='block w-full rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
           >
             Profile
           </Link>
 
           <button
-            type="button"
-            role="menuitem"
+            type='button'
+            role='menuitem'
             onClick={handleLogout}
-            className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+            className='block w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50'
           >
             Log out
           </button>

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import FileDropzone from '../../../components/FileDropzone';
 
 type Props = {
