@@ -12,7 +12,8 @@ import {
 import { auth } from '../../firebase/firebase.ts';
 import {
   createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail, // ← used to explain "email already in use" nicely
+  fetchSignInMethodsForEmail,
+  sendEmailVerification, // keep user signed in; redirect via next
 } from 'firebase/auth';
 import { ensureUserDoc } from './ensureUserDoc';
 import {
@@ -43,13 +44,14 @@ const sanitizeEmail = (raw: string) =>
  * - Social sign up (Google, Facebook, Apple)
  * - Creates Firestore user doc; writes `status` only on first creation
  * - Password visibility toggle
+ * - Email verification flow: keep user signed in; go to /verify-email?next=/
  */
 const SignupPage = () => {
   // --- Form fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // NEW: account status (French options)
+  // Account status (French options)
   const [status, setStatus] = useState<'acheteur' | 'vendeur'>('acheteur');
 
   // --- Checkboxes (consents/preferences)
@@ -179,10 +181,16 @@ const SignupPage = () => {
       // Create/merge Firestore user profile (includes status + marketing flag)
       await ensureUserDoc(user, { marketingOptIn: newsChecked, status });
 
-      // Redirect to Login after successful signup
-      navigate('/login');
+      // Send verification e-mail that redirects back to /verify-email with next=/
+      await sendEmailVerification(user, {
+        url: `${window.location.origin}/verify-email?next=/`,
+        handleCodeInApp: false,
+      });
 
-      // Reset form state
+      // Keep user signed in; take them to verify page (auto-redirect to / after success)
+      navigate('/verify-email?next=/', { replace: true });
+
+      // Reset form state (optional)
       setEmail('');
       setPassword('');
       setTermsChecked(false);
@@ -191,7 +199,6 @@ const SignupPage = () => {
       setStatus('acheteur');
     } catch (error: any) {
       const code = error?.code as string | undefined;
-      // Make provider names friendlier
       const providerLabel = (pid: string) =>
         pid === 'google.com'
           ? 'Google'
@@ -205,7 +212,6 @@ const SignupPage = () => {
 
       switch (code) {
         case 'auth/email-already-in-use': {
-          // Email belongs to an existing account → find how to guide the user
           try {
             const methods = await fetchSignInMethodsForEmail(
               auth,
@@ -218,12 +224,10 @@ const SignupPage = () => {
                 .map(providerLabel);
 
               if (hasPassword) {
-                // Account already has password: tell user to Log in instead
                 setFormError(
                   'This email is already registered. Please log in instead.'
                 );
               } else if (otherProviders.length) {
-                // Registered via social only
                 setFormError(
                   `This email is already registered with ${otherProviders.join(
                     ' / '
@@ -235,7 +239,6 @@ const SignupPage = () => {
                 );
               }
             } else {
-              // Fallback generic
               setFormError(
                 'This email is already registered. Try logging in or reset your password.'
               );
@@ -247,27 +250,22 @@ const SignupPage = () => {
           }
           break;
         }
-
         case 'auth/invalid-email':
           setFormError('Enter a valid email address.');
           break;
-
         case 'auth/weak-password':
           setFormError(
             'Password is too weak. Please meet the requirements below.'
           );
           break;
-
         case 'auth/network-request-failed':
           setFormError(
             'Network error. Please check your connection and try again.'
           );
           break;
-
         case 'auth/too-many-requests':
           setFormError('Too many attempts. Please try again later.');
           break;
-
         default:
           setFormError(
             error?.message ?? 'Something went wrong. Please try again.'
@@ -363,9 +361,8 @@ const SignupPage = () => {
               autoComplete="email"
             />
 
-            {/* Password input + eye icon (kept aligned) + live requirements (as sibling) */}
+            {/* Password input + eye icon + live requirements */}
             <div className="space-y-2">
-              {/* Only input + eye inside the relative wrapper so the eye stays centered */}
               <div className="relative">
                 <input
                   type={showPw ? 'text' : 'password'}
@@ -381,7 +378,6 @@ const SignupPage = () => {
                   autoComplete="new-password"
                 />
 
-                {/* Eye icon: prevent input from losing focus on mouse down to avoid flicker */}
                 <button
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
@@ -394,7 +390,6 @@ const SignupPage = () => {
                 </button>
               </div>
 
-              {/* Requirements list */}
               {(pwFocused || password.length > 0) && (
                 <ul
                   id="pw-reqs"
@@ -456,7 +451,7 @@ const SignupPage = () => {
               )}
             </div>
 
-            {/* NEW — Account status (French) */}
+            {/* Account status (French) */}
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium text-gray-700">
                 Statut du compte
