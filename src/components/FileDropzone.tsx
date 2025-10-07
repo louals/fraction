@@ -422,7 +422,12 @@ export default function FileDropzone({
       {previewItems.length > 0 && (
         <ul className="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {previewItems.map(({ key, file, isImg, url, index }) => (
-            <li key={key} className="group relative rounded-xl border p-3">
+            <li
+              key={key}
+              className="group relative rounded-xl border p-3   shadow-[8px_0_24px_-4px_rgba(58,49,120,0.45)]
+    hover:shadow-[16px_0_40px_-6px_rgba(106,92,207,0.65)]
+    transition-shadow duration-300"
+            >
               {/* Image container is relative so the trash button can be precisely positioned */}
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-zinc-50 border-2 border-zinc-200 transition-all group-hover:border-[color:var(--color-fraction-violet-500,#3f3cbb)] group-hover:shadow-sm">
                 {isImg && url ? (
