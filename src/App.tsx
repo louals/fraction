@@ -6,7 +6,7 @@ import LandingLayout from './layouts/LandingLayout';
 import SpaciousLayout from './layouts/SpaciousLayout';
 import Landing from './pages/Landing';
 import { Invest } from './pages/Invest';
-import { Dashboard } from './pages/Dashboard';
+import { Dashboard } from './pages/Profil';
 import { OneProductDetails } from './pages/OneProductDetails';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
@@ -22,13 +22,13 @@ import VerifyEmailPage from './components/auth/VerifyEmailPage';
 
 function App() {
   return (
-    <div className="relative h-screen">
+    <div className='relative h-screen'>
       <BrowserRouter>
         <AuthProvider>
           <Routes>
             {/* 🔒 Routes protégées */}
             <Route
-              path="/profil"
+              path='/profil'
               element={
                 <RequireAuth>
                   <SpaciousLayout>
@@ -38,7 +38,7 @@ function App() {
               }
             />
             <Route
-              path="/sell"
+              path='/sell'
               element={
                 <RequireAuth>
                   <SpaciousLayout>
@@ -50,7 +50,7 @@ function App() {
 
             {/*  Pages visibles uniquement si NON connecté */}
             <Route
-              path="/signup"
+              path='/signup'
               element={
                 <PublicOnly>
                   <AuthLayout>
@@ -60,7 +60,7 @@ function App() {
               }
             />
             <Route
-              path="/login"
+              path='/login'
               element={
                 <PublicOnly>
                   <AuthLayout>
@@ -72,7 +72,7 @@ function App() {
 
             {/* Vérification d’e-mail — accessible à tous (pas sous RequireAuth/PublicOnly) */}
             <Route
-              path="/verify-email"
+              path='/verify-email'
               element={
                 <AuthLayout>
                   <VerifyEmailPage />
@@ -82,7 +82,7 @@ function App() {
 
             {/* 🌐 Pages publiques */}
             <Route
-              path="/"
+              path='/'
               element={
                 <LandingLayout>
                   <Landing />
@@ -90,7 +90,7 @@ function App() {
               }
             />
             <Route
-              path="/invest"
+              path='/invest'
               element={
                 <MainLayout>
                   <Invest />
@@ -98,7 +98,7 @@ function App() {
               }
             />
             <Route
-              path="/oneProductDetails"
+              path='/oneProductDetails'
               element={
                 <MainLayout>
                   <OneProductDetails />
@@ -108,17 +108,17 @@ function App() {
 
             {/* 🔑 Password reset flow */}
             <Route
-              path="/forgot-password"
+              path='/forgot-password'
               element={<RequestPasswordResetForm />}
             />
             <Route
-              path="/reset-password"
+              path='/reset-password'
               element={<ConfirmPasswordResetPage />}
             />
 
             {/* ❌ 404 */}
             <Route
-              path="/404"
+              path='/404'
               element={
                 <SpaciousLayout>
                   <ErrorPage />
