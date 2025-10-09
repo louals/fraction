@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 type Step = { number: 1 | 2 | 3; label: string };
+
 export type StepCirclesProps = {
   current: 1 | 2 | 3;
   steps?: Step[];
@@ -18,14 +19,14 @@ export default function StepCircles({
 }: StepCirclesProps) {
   return (
     <div className={['w-full', className ?? ''].join(' ')}>
-      <ol className='flex items-center gap-3'>
+      <ol className="flex items-center gap-3">
         {steps.map((s, idx) => {
           const reached = s.number <= current;
           const isCurrent = s.number === current;
 
           return (
             <React.Fragment key={s.number}>
-              <li className='relative flex items-center gap-3'>
+              <li className="relative flex items-center gap-3">
                 <span
                   className={[
                     'grid size-9 place-items-center rounded-full border text-sm font-semibold transition',
