@@ -1,6 +1,7 @@
 import * as React from 'react';
 import Field from '../../../components/Field';
 import FileDropzone from '../../../components/FileDropzone';
+import AddressAutocomplete from '../../AdressAutoComplete';
 import {
   PROVINCES_CA,
   CA_POSTAL_REGEX,
@@ -42,23 +43,35 @@ export default function Step1Basic({
     onChange({ ...value, [key]: val });
   }
 
-  function validateMinimal(): string | null {
-    if (!value.title.trim()) return 'Titre requis';
-    if (
-      !value.addressLine1.trim() ||
-      !value.city.trim() ||
-      !value.postalCode.trim()
-    )
-      return 'Adresse incomplète';
-    if (!CA_POSTAL_REGEX.test(value.postalCode))
-      return 'Code postal canadien invalide (ex: H2X 1Y4)';
+  const onlyDigits = (s: string) => s.replace(/\D+/g, '');
+
+  function validate(): string | null {
+    if (!value.title.trim()) return 'Le titre est requis.';
+    if (!value.description.trim()) return 'La description est requise.';
     const price = Number(value.priceCAD);
-    if (Number.isNaN(price) || price <= 0) return 'Prix invalide';
+    if (!value.priceCAD || Number.isNaN(price) || price <= 0)
+      return 'Prix (CAD) invalide.';
+    if (!value.addressLine1.trim()) return 'Adresse (ligne 1) requise.';
+    if (!value.city.trim()) return 'Ville requise.';
+    if (!value.province) return 'Province requise.';
+    if (!value.postalCode.trim()) return 'Code postal requis.';
+    if (!CA_POSTAL_REGEX.test(value.postalCode))
+      return 'Code postal canadien invalide (ex: H2X 1Y4).';
+    const beds = Number(value.bedrooms);
+    const baths = Number(value.bathrooms);
+    const sqft = Number(value.sizeSqft);
+    if (!value.bedrooms || Number.isNaN(beds) || beds <= 0)
+      return 'Nombre de chambres invalide.';
+    if (!value.bathrooms || Number.isNaN(baths) || baths <= 0)
+      return 'Nombre de salles de bain invalide.';
+    if (!value.sizeSqft || Number.isNaN(sqft) || sqft <= 0)
+      return 'Superficie (pi²) invalide.';
+    if (photos.length === 0) return 'Ajoute au moins une photo.';
     return null;
   }
 
   function handleNext() {
-    const v = validateMinimal();
+    const v = validate();
     if (v) {
       setError(v);
       return;
@@ -67,7 +80,6 @@ export default function Step1Basic({
     onNext();
   }
 
-  // style champ unique (input / select / textarea)
   const baseField =
     'w-full rounded-xl border bg-white px-3 py-2.5 text-[15px] ' +
     'border-zinc-300 shadow-[0_1px_0_rgba(16,24,40,.04)] transition ' +
@@ -78,25 +90,21 @@ export default function Step1Basic({
 
   return (
     <div className='grid gap-8'>
-      {/* Barre d’erreur élégante */}
       {error && (
         <div className='rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700'>
           {error}
         </div>
       )}
 
-      {/* Intro courte */}
       <div>
         <h2 className='text-lg font-semibold text-zinc-900'>
           Informations de base
         </h2>
         <p className='mt-1 text-sm text-zinc-500'>
-          Renseigne les détails principaux de la propriété. Tu pourras affiner
-          ensuite.
+          Tous les champs sont obligatoires <b>sauf</b> “Adresse (ligne 2)”.
         </p>
       </div>
 
-      {/* Grid des champs */}
       <div className='grid gap-4 md:grid-cols-2'>
         <Field label='Titre' required>
           <input
@@ -110,19 +118,30 @@ export default function Step1Basic({
         <Field label='Prix (CAD)' required>
           <input
             className={baseField}
+            type='text'
             inputMode='numeric'
+            pattern='\d*'
             value={value.priceCAD}
-            onChange={(e) => update('priceCAD', e.target.value)}
+            onChange={(e) => update('priceCAD', onlyDigits(e.target.value))}
             placeholder='Ex: 325000'
           />
         </Field>
 
         <Field label='Adresse (ligne 1)' required>
-          <input
-            className={baseField}
+          <AddressAutocomplete
             value={value.addressLine1}
-            onChange={(e) => update('addressLine1', e.target.value)}
-            placeholder='123 Rue Principale'
+            onChange={(s) => update('addressLine1', s)}
+            onAddress={({ addressLine1, city, province, postalCode }) => {
+              onChange({
+                ...value,
+                addressLine1,
+                city: city || value.city,
+                province: (province || value.province) as ProvinceCA,
+                postalCode: postalCode || value.postalCode,
+              });
+            }}
+            placeholder='3800 R. Sherbrooke E'
+            className={baseField}
           />
         </Field>
 
@@ -131,7 +150,7 @@ export default function Step1Basic({
             className={baseField}
             value={value.addressLine2}
             onChange={(e) => update('addressLine2', e.target.value)}
-            placeholder='Apt, unité, etc. (optionnel)'
+            placeholder='Apt, unité (optionnel)'
           />
         </Field>
 
@@ -164,53 +183,59 @@ export default function Step1Basic({
             value={value.postalCode}
             onChange={(e) => update('postalCode', e.target.value)}
             placeholder='H2X 1Y4'
+            autoComplete='postal-code'
           />
         </Field>
 
-        <Field label='Chambres'>
+        <Field label='Chambres' required>
           <input
             className={baseField}
+            type='text'
             inputMode='numeric'
+            pattern='\d*'
             value={value.bedrooms}
-            onChange={(e) => update('bedrooms', e.target.value)}
+            onChange={(e) => update('bedrooms', onlyDigits(e.target.value))}
             placeholder='Ex: 2'
           />
         </Field>
 
-        <Field label='Salles de bain'>
+        <Field label='Salles de bain' required>
           <input
             className={baseField}
+            type='text'
             inputMode='numeric'
+            pattern='\d*'
             value={value.bathrooms}
-            onChange={(e) => update('bathrooms', e.target.value)}
+            onChange={(e) => update('bathrooms', onlyDigits(e.target.value))}
             placeholder='Ex: 1'
           />
         </Field>
 
-        <Field label='Superficie (pi²)'>
+        <Field label='Superficie (pi²)' required>
           <input
             className={baseField}
+            type='text'
             inputMode='numeric'
+            pattern='\d*'
             value={value.sizeSqft}
-            onChange={(e) => update('sizeSqft', e.target.value)}
+            onChange={(e) => update('sizeSqft', onlyDigits(e.target.value))}
             placeholder='Ex: 780'
           />
         </Field>
       </div>
 
-      <Field label='Description'>
+      <Field label='Description' required>
         <textarea
           className={`${baseField} min-h-[120px]`}
           value={value.description}
           onChange={(e) => update('description', e.target.value)}
-          placeholder='Parle de la luminosité, du voisinage, des atouts (balcon, stationnement, rénovations, etc.).'
+          placeholder='Atouts, rénovations, voisinage, etc.'
         />
       </Field>
 
-      {/* Photos (dropzone) */}
       <FileDropzone
-        label='Photos (images)'
-        hint='JPG/PNG/WEBP jusqu’à 10MB — glisse & dépose ou clique pour téléverser'
+        label='Photos (WEBP/PNG/JPG)'
+        hint='Au moins 1 image — ≤ 10MB chacune'
         accept='image/webp,image/png,image/jpeg,.webp,.png,.jpg,.jpeg'
         maxSizeMB={10}
         multiple
@@ -218,7 +243,6 @@ export default function Step1Basic({
         onChange={onPhotosChange}
       />
 
-      {/* CTA */}
       <div className='mt-2 flex justify-end'>
         <button
           className='inline-flex items-center justify-center rounded-3xl px-6 py-2 border-2 select-none transition ease-out
