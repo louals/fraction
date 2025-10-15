@@ -129,7 +129,7 @@ export default function Landing(): React.ReactNode {
           investing easy, with expert management and steady returns.
         </p>
         <div className='flex flex-col gap-6 mt-4'>
-          <article className='flex relative'>
+          <article className='flex relative transition-all duration-300 hover:scale-103'>
             <div className='px-8 pt-6 pb-10 w-[90%] rounded-[24px] border border-zinc-200 bg-white shadow-[0_10px_40px_rgba(17,12,46,.08)]'>
               <h3 className='text-3xl md:text-4xl font-extrabold text-[var(--color-fraction-violet-500)]'>
                 Reason 1
@@ -151,7 +151,7 @@ export default function Landing(): React.ReactNode {
               />
             </div>
           </article>
-          <article className='flex relative'>
+          <article className='flex relative transition-all duration-300 hover:scale-103'>
             <div className='px-8 pt-6 pb-10 w-[90%] rounded-[24px] border border-zinc-200 bg-white shadow-[0_10px_40px_rgba(17,12,46,.08)]'>
               <h3 className='text-3xl md:text-4xl font-extrabold text-[var(--color-fraction-violet-500)]'>
                 Reason 2
@@ -173,7 +173,7 @@ export default function Landing(): React.ReactNode {
               />
             </div>
           </article>
-          <article className='flex relative'>
+          <article className='flex relative transition-all duration-300 hover:scale-103'>
             <div className='px-8 pt-6 pb-10 w-[90%] rounded-[24px] border border-zinc-200 bg-white shadow-[0_10px_40px_rgba(17,12,46,.08)]'>
               <h3 className='text-3xl md:text-4xl font-extrabold text-[var(--color-fraction-violet-500)]'>
                 Reason 3
