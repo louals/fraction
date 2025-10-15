@@ -1,48 +1,76 @@
-// src/App.tsx
+// ======== Tools =========
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import 'mapbox-gl/dist/mapbox-gl.css';
+// ======== Layout =========
 import MainLayout from './layouts/MainLayout';
 import AuthLayout from './layouts/AuthLayout';
 import LandingLayout from './layouts/LandingLayout';
 import SpaciousLayout from './layouts/SpaciousLayout';
-import Landing from './pages/Landing';
-import { Invest } from './pages/Invest';
-import { Dashboard } from './pages/Profil';
-import { OneProductDetails } from './pages/OneProductDetails';
+// ======== Pages =========
+// global pages
+import LandingPage from './pages/LandingPage.tsx';
+import ErrorPage from './pages/ErrorPage';
+import InvestPage from './pages/InvestPage.tsx';
+import ProfilPage from './pages/ProfilPage.tsx';
+import OneProductDetailsPage from './pages/OneProductDetailsPage.tsx';
+import PropertySellPage from './pages/property/SellPropertyPage.tsx';
+// Authentification pages
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
-import ConfirmPasswordResetPage from './components/auth/ConfirmPasswordResetPage.tsx';
-import RequestPasswordResetForm from './components/auth/RequestPasswordResetForm.tsx';
-import ErrorPage from './pages/ErrorPage';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import VerifyEmailPage from './components/auth/VerifyEmailPage';
+// Dashboard pages
+import DashboardPage from './pages/dashboard/DashboardPage.tsx';
+import DashboardIncomePage from './pages/dashboard/DashboardIncomePage.tsx';
+// ======== Components =========
 import AuthProvider from '../src/components/auth/AuthProvider';
 import RequireAuth from '../src/components/auth/RequireAuth';
 import { PublicOnly } from '../src/components/auth/PublicOnly';
-import PropertySell from './pages/property/SellProperty';
-import VerifyEmailPage from './components/auth/VerifyEmailPage';
+import ConfirmPasswordResetPage from './components/auth/ConfirmPasswordResetPage.tsx';
+import RequestPasswordResetForm from './components/auth/RequestPasswordResetForm.tsx';
 
 function App() {
   return (
-    <div className="relative h-screen">
+    <div className='relative h-screen'>
       <BrowserRouter>
         <AuthProvider>
           <Routes>
             {/* 🔒 Routes protégées */}
             <Route
-              path="/profil"
+              path='/profil'
               element={
                 <RequireAuth>
                   <SpaciousLayout>
-                    <Dashboard />
+                    <ProfilPage />
                   </SpaciousLayout>
                 </RequireAuth>
               }
             />
             <Route
-              path="/sell"
+              path='/sell'
               element={
                 <RequireAuth>
                   <SpaciousLayout>
-                    <PropertySell />
+                    <PropertySellPage />
+                  </SpaciousLayout>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path='/dashboard'
+              element={
+                <RequireAuth>
+                  <SpaciousLayout>
+                    <DashboardPage />
+                  </SpaciousLayout>
+                </RequireAuth>
+              }
+            />
+            <Route
+              path='/dashboard/income'
+              element={
+                <RequireAuth>
+                  <SpaciousLayout>
+                    <DashboardIncomePage />
                   </SpaciousLayout>
                 </RequireAuth>
               }
@@ -50,7 +78,7 @@ function App() {
 
             {/*  Pages visibles uniquement si NON connecté */}
             <Route
-              path="/signup"
+              path='/signup'
               element={
                 <PublicOnly>
                   <AuthLayout>
@@ -60,7 +88,7 @@ function App() {
               }
             />
             <Route
-              path="/login"
+              path='/login'
               element={
                 <PublicOnly>
                   <AuthLayout>
@@ -72,7 +100,7 @@ function App() {
 
             {/* Vérification d’e-mail — accessible à tous (pas sous RequireAuth/PublicOnly) */}
             <Route
-              path="/verify-email"
+              path='/verify-email'
               element={
                 <AuthLayout>
                   <VerifyEmailPage />
@@ -82,43 +110,43 @@ function App() {
 
             {/* 🌐 Pages publiques */}
             <Route
-              path="/"
+              path='/'
               element={
                 <LandingLayout>
-                  <Landing />
+                  <LandingPage />
                 </LandingLayout>
               }
             />
             <Route
-              path="/invest"
+              path='/invest'
               element={
                 <MainLayout>
-                  <Invest />
+                  <InvestPage />
                 </MainLayout>
               }
             />
             <Route
-              path="/oneProductDetails"
+              path='/oneProductDetails'
               element={
                 <MainLayout>
-                  <OneProductDetails />
+                  <OneProductDetailsPage />
                 </MainLayout>
               }
             />
 
             {/* 🔑 Password reset flow */}
             <Route
-              path="/forgot-password"
+              path='/forgot-password'
               element={<RequestPasswordResetForm />}
             />
             <Route
-              path="/reset-password"
+              path='/reset-password'
               element={<ConfirmPasswordResetPage />}
             />
 
             {/* ❌ 404 */}
             <Route
-              path="/404"
+              path='/404'
               element={
                 <SpaciousLayout>
                   <ErrorPage />

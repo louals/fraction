@@ -6,7 +6,7 @@ import { Card } from '../components/CardProperty';
  * page invest with grid card property
  * @returns React.Reactnode
  */
-export function Invest(): React.ReactNode {
+export default function InvestPage(): React.ReactNode {
   return (
     <div
       className='flex flex-col items-center gap-[32px]

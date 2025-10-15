@@ -3,12 +3,12 @@ import GalleryHero from '../components/GalleryHero';
 import InvestmentCard from '../components/InvestmentCard';
 import { TabsInfo } from '../components/TabsInfo';
 
-export function OneProductDetails() {
+export default function OneProductDetailsPage() {
   return (
-    <main className="mx-auto space-y-8">
+    <main className='mx-auto space-y-8'>
       {/* Top: Gallery + Investment card */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[2fr_1fr] items-stretch md:h-[460px]">
-        <GalleryHero productId="p-001" />
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-[2fr_1fr] items-stretch md:h-[460px]'>
+        <GalleryHero productId='p-001' />
         <InvestmentCard />
       </div>
 
@@ -19,5 +19,3 @@ export function OneProductDetails() {
     </main>
   );
 }
-
-export default OneProductDetails;

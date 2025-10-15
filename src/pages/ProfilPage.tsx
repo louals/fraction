@@ -31,7 +31,7 @@ function Placeholder({ title }: { title: string }): React.ReactNode {
   );
 }
 
-export function Dashboard(): React.ReactNode {
+export default function ProfilPage(): React.ReactNode {
   // changement onglet actif
   const [active, setActive] = useState<TabKey>('account');
 
